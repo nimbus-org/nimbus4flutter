@@ -1,6 +1,10 @@
 # nimbus4flutter
 
-A new Flutter package project.
+This is a library for developing Flutter applications that communicate with a web server built using [Project Nimbus](https://github.com/nimbus-org/nimbus).
+
+It consists of the following two main functionalities
+* [DataSet], which is a dynamic generic DTO.
+* Abstraction of the server's API [Api]
 
 ## Getting Started
 
