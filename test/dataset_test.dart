@@ -489,7 +489,7 @@ void main() {
             FieldSchema<bool>("hasSpouse"),
             FieldSchema<int>.view(
               "careerCount",
-              (ds, rec) => ds?.getRecordList("career")?.length,
+              (ds, rec, dv) => ds?.getRecordList("career")?.length,
               defaultValue: 0
             ),
             FieldSchema.record("careerTerm", "term")
@@ -501,19 +501,19 @@ void main() {
           [
             FieldSchema<DateTime>.view(
               "from",
-              (ds, rec){
+              (ds, rec, dv){
                 List<Object> froms = ds?.getRecordList("career")?.map((element) => element["from"])?.toList();
                 froms?.sort();
-                return froms?.length == 0 ? null : froms?.first;
+                return froms?.length == 0 ? dv : froms?.first;
               },
               outputConverter: dateToString
             ),
             FieldSchema<DateTime>.view(
               "to",
-              (ds, rec){
+              (ds, rec, dv){
                 List<Object> tos = ds?.getRecordList("career")?.map((element) => element["to"])?.toList();
                 tos?.sort();
-                return tos?.length == 0 ?null : tos?.last;
+                return tos?.length == 0 ? dv : tos?.last;
               },
               outputConverter: dateToString
             ),

@@ -34,6 +34,29 @@ import 'dart:math';
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
+/// RecordList is a dynamic DTO that represents a two-dimensional data structure.
+/// 
+/// For example
+/// ```dart
+/// import 'package:nimbus4flutter/nimbus4flutter.dart';
+/// 
+/// RecordList list = RecordList(
+///   RecordSchema(
+///     [
+///       FieldSchema<String>("name"),
+///       FieldSchema<int>("age")
+///     ]
+///   )
+/// );
+/// Record record1 = list.createRecord();
+/// record1["name"] = "hoge";
+/// record1["age"] = 20;
+/// list.add(record1);
+/// Record record2 = list.createRecord();
+/// record2["name"] = "fuga";
+/// record2["age"] = 15;
+/// list.add(record2);
+/// ```
 class RecordList implements List<Record>{
 
   final RecordSchema _schema;
@@ -46,10 +69,11 @@ class RecordList implements List<Record>{
     _records = List<Record>(),
     _primaryKeyMap = schema.hasPrimary ? Map<Object,Record>() : null;
 
+  /// Schema definition
   RecordSchema get schema => _schema;
 
+  /// The parent DataSet, which is null if it is an independent RecordList.
   set dataSet(ds) => _dataSet = ds;
-  
   DataSet get dataSet => _dataSet;
 
   @override
@@ -174,8 +198,12 @@ class RecordList implements List<Record>{
     return _records.contains(element);
   }
 
+  /// Check if a field with the given name exists.
   bool containsName(String name) => _schema.fieldMap.containsKey(name);
 
+  // Create a Record.
+  // 
+  // To create a record with a value, specify [values]. Without arguments, it is the same as calling [fromMap()] after calling this method.
   Record createRecord({Map<String,Object> values}){
     Record record = Record(_schema);
     record.dataSet = _dataSet;
@@ -226,6 +254,7 @@ class RecordList implements List<Record>{
     _records.forEach(f);
   }
 
+  /// Copies the value of the specified RecordList to this RecordList.
   RecordList fromRecordList(RecordList list){
     list.forEach(
       (value){
@@ -237,6 +266,7 @@ class RecordList implements List<Record>{
     return this;
   }
 
+  /// Copies the value of the specified List to this RecordList.
   RecordList fromMap(List<dynamic> list){
     list.forEach(
       (value){
@@ -248,6 +278,10 @@ class RecordList implements List<Record>{
     return this;
   }
 
+  /// Output the value of this record to the List
+  /// 
+  /// If [hasNull] is set to false, fields with a value of null will not be output. this can be used to reduce the output when there is no need to tell that they are null.
+  /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
   List<Map<String,Object>> toMap({bool hasNull=true,bool toJsonType=false}){
     List<Map<String,Object>> list = List();
     Iterator<Record> itr = iterator;
@@ -257,6 +291,9 @@ class RecordList implements List<Record>{
     return list;
   }
 
+  /// Copies the value of the specified List to this RecordList.
+  /// 
+  /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
   RecordList fromList(List<List<Object>> list,[Map<String,Object> recordListSchemaMap, Map<String,Object> schemaMap]){
     list.forEach(
       (value){
@@ -268,6 +305,9 @@ class RecordList implements List<Record>{
     return this;
   }
 
+  /// Output the value of this RecordList to the List
+  /// 
+  /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
   List<List<Object>> toDeepList({bool toJsonType=false}){
     List<List<Object>> list = List();
     Iterator<Record> itr = iterator;
@@ -338,6 +378,7 @@ class RecordList implements List<Record>{
     return _records.map(test);
   }
 
+  /// Primary key search with the specified [Record] as the key.
   Record primary(Record key){
     if(!_schema.hasPrimary){
       return null;
@@ -453,6 +494,9 @@ class RecordList implements List<Record>{
     _records.sort(compare);
   }
 
+  /// Sort by the specified field name.
+  /// 
+  /// The ascending/descending order is specified by the [isAsc] parameter.
   void sortBy(List<String> names, [List<bool> isAsc]){
     sort(
       (a, b){
@@ -523,6 +567,9 @@ class RecordList implements List<Record>{
     return _records.whereType();
   }
 
+  /// Clone the data.
+  /// 
+  /// If [isDeep] is not set to true, the clone will be a shallow copy.
   RecordList clone([bool isDeep=false]){
     RecordList list = new RecordList(_schema);
     list.dataSet = _dataSet;

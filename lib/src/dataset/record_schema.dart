@@ -32,6 +32,8 @@
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
+
+/// Define the schema for [Record].
 @immutable
 class RecordSchema{
   
@@ -46,23 +48,31 @@ class RecordSchema{
       _primaryFields = List.from(fields.where((e) => e.isPrimary)),
       _primaryFieldMap = Map.fromIterable(fields.where((e) => e.isPrimary), key: (e) => e.name);
 
+  /// List of all [FieldSchema].
   List<FieldSchema> get fields => _fields;
 
+  /// List of [FieldSchema] to configure the primary key.
   List<FieldSchema> get primaryFields => _primaryFields;
   
+  /// Map of all [FieldSchema].
   Map<String,FieldSchema> get fieldMap => _fieldMap;
   
+  /// Map of [FieldSchema] to configure the primary key.
   Map<String,FieldSchema> get primaryFieldMap => _primaryFieldMap;
   
+  /// Number of fields.
   int get length => _fields.length;
   
+  /// Iterable of field names;
   Iterable<String> get names => _fields.map((e)=>e.name);
 
+  /// Flag as having a primary key.
   bool get hasPrimary => _primaryFields.isNotEmpty;
   
   @override
   String toString() => "${super.toString()}{fields=$_fields}";
 
+  /// Output the schema to Map
   Map<String,Object> toMap(){
     Map map = Map<String,Object>();
     for(int i = 0 ;i < _fields.length; i++){

@@ -32,27 +32,106 @@
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
+/// Register and manage [ApiServer] and [Api].
+/// 
+/// For example
+/// ```dart
+/// import 'dart:io';
+/// import 'dart:convert';
+/// import 'package:nimbus4flutter/nimbus4flutter.dart';
+/// 
+/// ApiRegistory.registApiServer(
+///   ApiServer(
+///     name: "local server",
+///     host: "localhost",
+///     requestBuilder: (request, method, input) {
+///       switch(method){
+///         case HttpMethod.POST:
+///         DataSet ds = input as DataSet;
+///         request.headers.contentType = new ContentType("application", "json", charset: "utf-8");
+///         request.write(
+///           JsonEncoder().convert(ds.toMap(toJsonType: true))
+///         );
+///         break;
+///       default:
+///         break;
+///       }
+///     },
+///     responseParser: (response, method, output) async{
+///       if(response.statusCode != 200){
+///         throw new Exception("error status = ${response.statusCode}");
+///       }
+///       if(output != null){
+///         DataSet ds = output as DataSet;
+///         ds.fromMap(JsonDecoder().convert(await response.transform(Utf8Decoder()).join()));
+///       }
+///     },
+///   )
+/// );
+/// 
+/// ApiRegistory.registApi(
+///   SingleApi<DataSet,DataSet>(
+///     name: "get user",
+///     serverName: "local server",
+///     method:HttpMethod.POST
+///     path:"/users",
+///     inputCreator: (context){
+///       DataSet ds = DataSet("Condition");
+///       ds.setHeaderSchema(
+///         RecordSchema([FieldSchema<String>("name")])
+///       );
+///       return ds;
+///     },
+///     outputCreator: (context){
+///       DataSet ds = DataSet("User");
+///       ds.setHeaderSchema(
+///         RecordSchema(
+///           [
+///             FieldSchema<String>("name"),
+///             FieldSchema<int>("age"),
+///             FieldSchema<String>("tel"),
+///             FieldSchema<String>("address1"),
+///             FieldSchema<String>("address2")
+///           ]
+///         )
+///       );
+///       return ds;
+///     }
+///   )
+/// );
+/// 
+/// Api api = ApiRegistory.getApi("get user");
+/// RequestContext context = RequestContext();
+/// DataSet request = api.getInput(context);
+/// request.getHeader()["name"] = "hoge";
+/// DataSet response = await api.request(request, context);
+/// ```
 class ApiRegistory{
 
   static final Map<String,ApiServer> apiServerRegistory = new Map();
   static final Map<String,Api> apiRegistory = new Map();
 
+  /// Register [ApiServer].
   static registApiServer(ApiServer server){
     apiServerRegistory[server.name] = server;
   }
   
+  /// Get [ApiServer] with the specified name
   static ApiServer getApiServer(String name){
     return apiServerRegistory[name];
   }
   
+  /// Register [Api].
   static registApi(Api api){
     apiRegistory[api.name] = api;
   }
   
+  /// Get [Api] with the specified name
   static Api getApi(String name){
     return apiRegistory[name];
   }
 
+  /// Close repository.
   static void close({bool force: false}){
     apiServerRegistory.values.forEach((server) {server.close(force:force);});
     apiRegistory.clear();

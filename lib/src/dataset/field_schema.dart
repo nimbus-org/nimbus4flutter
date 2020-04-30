@@ -34,9 +34,42 @@ import 'dart:core';
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
+/// This function is used for input conversion and output conversion of a field.
 typedef FieldConverter<I,O> = O Function(I input);
-typedef FieldViewer<O> = O Function(DataSet ds, Record rec);
 
+/// This function is used for the view of a field.
+typedef FieldViewer<O> = O Function(DataSet ds, Record rec, O defaultValue);
+
+/// Define the schema for the fields in [Record] and [RecordList].
+/// 
+/// There are four different schemas, and there are different constructors for them.
+/// 1. normal field
+/// For example
+/// ```dart
+/// FieldSchema<String>("field1")
+/// ```
+/// 
+/// 2. nested [Record] field
+/// For example
+/// ```dart
+/// FieldSchema.record("field2", "NestedRecord1")
+/// ```
+/// 
+/// 3. nested [RecordList] field.
+/// For example
+/// ```dart
+/// FieldSchema.list("field3", "NestedRecordList1")
+/// ```
+/// 
+/// 4. view field that has no entity
+/// For example
+/// Example for 4
+/// ```dart
+/// FieldSchema.view(
+///   "field4",
+///   (ds, rec, dv)=> ds == null || rec == null ? dv : (rec["field1"] as String) + ds.getHeader()["field2"]
+/// )
+/// ```
 @immutable
 class FieldSchema<T>{
   final String _name;
@@ -49,8 +82,16 @@ class FieldSchema<T>{
   final bool _isOutput;
   final String _schema;
 
+  /// Define a normal field.
+  /// 
+  /// In [name], define the name of the field.
+  /// In [defaultValue], define the initial value of the field. If not specified, the default value is null.
+  /// In [inputConverter], define the input conversion to the field.If the type of the field defined by the nominal type does not match the type of the field to be set, it will be converted to match the type of the field.Also, even if [inputConverter] is not specified, some types will be converted automatically. For more information, see the implementation of [parseValue()].
+  /// In [outputConverter], define the output conversion to the field.If the type of the field defined by the nominal type does not match the type to be retrieved from the field, it will be converted to match the type to be retrieved.Also, some types will be converted automatically even if [outputConverter] is not specified. For more information, see the implementation of [formatValue()].
+  /// In [isPrimary], define that this field constitutes the primary key. This argument is only valid for field definitions in RecordList.
+  /// In [isOutput], define that this field should be output to a Map or List.
   FieldSchema(
-    this._name,
+    String name,
     {
       T defaultValue,
       FieldConverter<dynamic,T> inputConverter,
@@ -58,7 +99,8 @@ class FieldSchema<T>{
       bool isPrimary = false,
       bool isOutput = true
     }
-  ) : _type = T,
+  ) : _name = name,
+      _type = T,
       _defaultValue = defaultValue,
       _inputConverter = inputConverter,
       _outputConverter = outputConverter,
@@ -67,14 +109,22 @@ class FieldSchema<T>{
       _isOutput = isOutput,
       _schema = null;
 
+  /// Define the nested [Record] field.
+  /// 
+  /// In [name], define the name of the field.
+  /// In [schema], define the name of the schema.
+  /// In [isPrimary], define that this field constitutes the primary key. This argument is only valid for field definitions in RecordList.
+  /// In [isOutput], define that this field should be output to a Map or List.
   FieldSchema.record(
-    this._name,
-    this._schema,
+    String name,
+    String schema,
     {
       bool isPrimary = false,
       bool isOutput = true
     }
-  ) : _type = Record,
+  ) : _name = name,
+      _schema = schema,
+      _type = Record,
       _defaultValue = null,
       _inputConverter = null,
       _outputConverter = null,
@@ -82,14 +132,22 @@ class FieldSchema<T>{
       _isOutput = isOutput,
       _isPrimary = isPrimary;
   
+  /// Define the nested [RecordList] field.
+  /// 
+  /// In [name], define the name of the field.
+  /// In [schema], define the name of the schema.
+  /// In [isPrimary], define that this field constitutes the primary key. This argument is only valid for field definitions in RecordList.
+  /// In [isOutput], define that this field should be output to a Map or List.
   FieldSchema.list(
-    this._name,
-    this._schema,
+    String name,
+    String schema,
     {
       bool isPrimary = false,
       bool isOutput = true
     }
-  ) : _type = RecordList,
+  ) : _name = name,
+      _schema = schema,
+      _type = RecordList,
       _defaultValue = null,
       _inputConverter = null,
       _outputConverter = null,
@@ -97,15 +155,26 @@ class FieldSchema<T>{
       _isOutput = isOutput,
       _isPrimary = isPrimary;
   
+  /// Define the view field that has no entity.
+  /// 
+  /// This type of field can be edited or combined with other fields in the same DataSet and Record to represent a value. This field does not have a value that is an entity of its own, so it cannot be set to a value.
+  /// 
+  /// In [name], define the name of the field.
+  /// In fieldViewer, define how to get the value of this field.
+  /// In [defaultValue], define the initial value of the field. If not specified, the default value is null.
+  /// In [outputConverter], define the output conversion to the field.If the type of the field defined by the nominal type does not match the type to be retrieved from the field, it will be converted to match the type to be retrieved.Also, some types will be converted automatically even if [outputConverter] is not specified. For more information, see the implementation of [formatValue()].
+  /// In [isOutput], define that this field should be output to a Map or List.
   FieldSchema.view(
-    this._name,
-    this._fieldViewer,
+    String name,
+    FieldViewer<T> fieldViewer,
     {
       T defaultValue,
       FieldConverter<T,dynamic> outputConverter,
       bool isOutput = true
     }
-  ) : _type = T,
+  ) : _name = name,
+      _fieldViewer = fieldViewer,
+      _type = T,
       _defaultValue = defaultValue,
       _inputConverter = null,
       _outputConverter = outputConverter,
@@ -113,18 +182,37 @@ class FieldSchema<T>{
       _isPrimary = false,
       _schema = null;
 
+  /// The name of the field.
   get name => _name;
+
+  /// The type of the field.
   get type => _type;
+
+  /// The default value for the field.
   get defaultValue => _defaultValue;
+
+  /// The flag whether the field is a component of the primary key or not.
   get isPrimary => _isPrimary;
+
+  /// The flag whether the field is output or not.
   get isOutput => _isOutput;
+
+  /// The flag whether the field is a view or not
   get isView => _fieldViewer != null;
+
+  /// The schema name when the field is a nested [Record] or [RecordList].
   get schema => _schema;
+
+  /// The flag whether or not an input conversion is present in the field.
   bool get hasInputConverter => _inputConverter != null; 
+
+  /// The flag whether or not an output conversion is present in the field.
   bool get hasOutputConverter => _outputConverter != null; 
   
+  /// Determines if the specified object is assignable to the type of this field.
   bool instanceof(Object value) => value == null ? true : value is T;
 
+  /// Input conversion of the specified object to match the type of this field.
   Object parseValue(Object inputValue){
     if(_inputConverter == null){
       if(inputValue == null || instanceof(inputValue)){
@@ -150,6 +238,8 @@ class FieldSchema<T>{
     }
   }
 
+
+  /// Converts the specified object suitable for the type of this field to an output that matches the specified generic type.
   F formatValue<F>(T value){
      if(_outputConverter == null){
        if(value == null || value is F){
@@ -175,8 +265,9 @@ class FieldSchema<T>{
      }
   }
   
+  /// If this field is a view, it will return a value using the specified [DataSet] and [Record].
   T viewValue(DataSet ds, Record record){
-    return _fieldViewer == null ? defaultValue : _fieldViewer(ds, record);
+    return _fieldViewer == null ? defaultValue : _fieldViewer(ds, record, defaultValue);
   }
   
   @override

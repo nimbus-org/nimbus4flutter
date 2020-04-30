@@ -34,6 +34,23 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 import 'dart:math';
 
+/// Record is a dynamic DTO that represents a one-dimensional data structure.
+/// 
+/// For example
+/// ```dart
+/// import 'package:nimbus4flutter/nimbus4flutter.dart';
+/// 
+/// Record record = Record(
+///   RecordSchema(
+///     [
+///       FieldSchema<String>("name"),
+///       FieldSchema<int>("age")
+///     ]
+///   )
+/// );
+/// record["name"] = "hoge";
+/// record["age"] = 20;
+/// ```
 class Record{
 
   final RecordSchema _schema;
@@ -50,26 +67,35 @@ class Record{
     _primaryKey = schema.hasPrimary ? _RecordPrimaryKey(schema, _values) : null;
   }
 
+  /// Schema definition
   RecordSchema get schema => _schema;
 
+  /// Primary key
   Object get primaryKey => _primaryKey;
 
-  set dataSet(ds) => _dataSet = ds;
-
+  /// The parent DataSet, which is null if it is an independent record.
   DataSet get dataSet => _dataSet;
+  set dataSet(ds) => _dataSet = ds;
 
   _RecordMapAccessOperator<T> call<T>() => _RecordMapAccessOperator(this);
 
+  /// Get the value of the specified field name.
   Object operator [] (String name){
     return getByName(name);
   }
 
+  /// Set the value of the specified field name.
   void operator []=(String name, Object value){
     setByName(name, value);
   }
 
+  /// Check if a field with the given name exists.
   bool containsName(String name) => _values.containsKey(name);
 
+  /// Get the value of the specified field name.
+  /// 
+  /// If the type of the requested return value is different from the type of this field defined, then an output conversion is performed.
+  /// And if you specify a field name that is not defined, it throws an exception.
   T getByName<T>(String name){
     FieldSchema fs = _schema.fieldMap[name];
     if(fs == null){
@@ -89,6 +115,10 @@ class Record{
     return ret;
   }
 
+  /// Get the value of the specified field index.
+  /// 
+  /// If the type of the requested return value is different from the type of this field defined, then an output conversion is performed.
+  /// And if you specify a field index that is not defined, it throws an exception.
   T getByIndex<T>(int index){
     if(index < 0 || index >= _schema.length){
       throw Exception("The specified field does not exist. index=$index, schema=$_schema");
@@ -96,6 +126,12 @@ class Record{
     return getByName(_schema.fields[index].name);
   }
 
+  /// Set the value of the specified field name.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field name that is not defined.
+  ///  * If you specify a field that is a view.
+  ///  * If input conversion is not possible.
   void setByName(String name, Object value){
     FieldSchema fs = _schema.fieldMap[name];
     if(fs == null){
@@ -115,6 +151,12 @@ class Record{
     _values[name] = value;
   }
 
+  /// Set the value of the specified field index.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field index that is not defined.
+  ///  * If you specify a field that is a view.
+  ///  * If input conversion is not possible.
   void setByIndex(int index, Object value){
     if(index < 0 || index >= _schema.length){
       throw Exception("The specified field does not exist. index=$index, schema=$_schema");
@@ -122,6 +164,11 @@ class Record{
     setByName(_schema.fields[index].name, value);
   }
 
+  /// Create a nested [Record] with the specified field name.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field name that is not defined.
+  ///  * If the specified field is not a nested [Record].
   Record createNestedRecordByName(String name){
     FieldSchema fs = _schema.fieldMap[name];
     if(fs == null){
@@ -133,6 +180,11 @@ class Record{
     return _dataSet.createNestedRecord(fs.schema);
   }
 
+  /// Create a nested [Record] with the specified field index.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field index that is not defined.
+  ///  * If the specified field is not a nested [Record].
   Record createNestedRecordByIndex(int index){
     if(index < 0 || index >= _schema.length){
       throw Exception("The specified field does not exist. index=$index, schema=$_schema");
@@ -140,6 +192,11 @@ class Record{
     return createNestedRecordByName(_schema.fields[index].name);
   }
 
+  /// Create a nested [RecordList] with the specified field name.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field name that is not defined.
+  ///  * If the specified field is not a nested [RecordList].
   RecordList createNestedRecordListByName(String name){
     FieldSchema fs = _schema.fieldMap[name];
     if(fs == null){
@@ -151,6 +208,11 @@ class Record{
     return _dataSet.createNestedRecordList(fs.schema);
   }
 
+  /// Create a nested [RecordList] with the specified field index.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field index that is not defined.
+  ///  * If the specified field is not a nested [RecordList].
   RecordList createNestedRecordListByIndex(int index){
     if(index < 0 || index >= _schema.length){
       throw Exception("The specified field does not exist. index=$index, schema=$_schema");
@@ -180,6 +242,7 @@ class Record{
     return value;
   }
 
+  /// Copies the value of the specified record to this record.
   Record fromRecord(Record record){
     for(String name in _schema.fieldMap.keys){
       if(record.containsName(name)){
@@ -189,6 +252,7 @@ class Record{
     return this;
   }
 
+  /// Copies the value of the specified Map to this record.
   Record fromMap(Map<String,Object> map){
     map.forEach(
       (name, value){
@@ -209,6 +273,10 @@ class Record{
     return this;
   }
 
+  /// Output the value of this record to the Map
+  /// 
+  /// If [hasNull] is set to false, fields with a value of null will not be output. this can be used to reduce the output when there is no need to tell that they are null.
+  /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
   Map<String,Object> toMap({bool hasNull=true, bool toJsonType=false}){
     Map map = Map<String,Object>();
     for(FieldSchema field in _schema.fields){
@@ -230,6 +298,9 @@ class Record{
   }
 
 
+  /// Copies the value of the specified List to this record.
+  /// 
+  /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
   Record fromList(List<Object> list,[Map<String,Object> recordSchemaMap, Map<String,Object> schemaMap]){
     if(recordSchemaMap == null){
       for(int i = 0; i < min(list.length, _schema.length); i++){
@@ -277,6 +348,9 @@ class Record{
     return this;
   }
 
+  /// Output the value of this record to the List
+  /// 
+  /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
   List<Object> toList({bool toJsonType=false}){
     List list = List();
     for(FieldSchema field in _schema.fields){
@@ -345,6 +419,7 @@ class Record{
   @override
   String toString() => "${super.toString()}{_values=$_values}";
 
+  /// Clone the data.
   Record clone(){
     Record record = Record(this._schema);
     record.dataSet = _dataSet;
@@ -352,6 +427,8 @@ class Record{
     return record;
   }
 
+  /// Clear the data.
+  /// The set schema information will not be cleared.
   void clear(){
     _schema.fields.forEach((field) => _values[field.name]=field.defaultValue);
   }

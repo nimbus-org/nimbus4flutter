@@ -40,6 +40,41 @@ typedef ApiServerHttpClientRequestBuilder = void Function(HttpClientRequest requ
 
 typedef ApiServerHttpClientResponseParser = Future<void> Function(HttpClientResponse response, HttpMethod method, Object output);
 
+/// It contains information about the server with the API and its processing.
+/// 
+/// For example
+/// ```dart
+/// import 'dart:io';
+/// import 'dart:convert';
+/// import 'package:nimbus4flutter/nimbus4flutter.dart';
+/// 
+/// ApiServer(
+///   name: "local server",
+///   host: "localhost",
+///   requestBuilder: (request, method, input) {
+///     switch(method){
+///       case HttpMethod.POST:
+///       DataSet ds = input as DataSet;
+///       request.headers.contentType = new ContentType("application", "json", charset: "utf-8");
+///       request.write(
+///         JsonEncoder().convert(ds.toMap(toJsonType: true))
+///       );
+///       break;
+///     default:
+///       break;
+///     }
+///   },
+///   responseParser: (response, method, output) async{
+///     if(response.statusCode != 200){
+///       throw new Exception("error status = ${response.statusCode}");
+///     }
+///     if(output != null){
+///       DataSet ds = output as DataSet;
+///       ds.fromMap(JsonDecoder().convert(await response.transform(Utf8Decoder()).join()));
+///     }
+///   },
+/// );
+/// ```
 @immutable
 class ApiServer{
   final String _name;
@@ -50,6 +85,14 @@ class ApiServer{
 
   final HttpClient _client = new HttpClient();
 
+  /// Construct ApiServer
+  /// 
+  /// In [name], specify a logical name of the server.
+  /// In [host], specify the hostname of the server.
+  /// In [port], specify the port of the server.
+  /// In [builder], specify the process of building HttpClient to communicate with the server.
+  /// In [requestBuilder], specify the process of building HttpClientRequest, an HTTP request to the server.
+  /// In [responseParser], specify the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
   ApiServer(
     {
       @required String name,
@@ -68,18 +111,25 @@ class ApiServer{
     if(builder != null)builder(_client);
   }
 
+  /// A logical name of the server.
   String get name => _name;
 
+  /// The hostname of the server.
   String get host => _host;
   
+  /// The port of the server.
   int get port => _port;
 
+  /// HttpClient to communicate with the server.
   HttpClient get client => _client;
 
+  /// The process of building HttpClientRequest, an HTTP request to the server.
   ApiServerHttpClientRequestBuilder get requestBuilder => _requestBuilder;
 
+  /// the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
   ApiServerHttpClientResponseParser get responseParser => _responseParser;
 
+  /// Close server.
   void close({bool force: false}) => _client.close(force:force);
 
 }

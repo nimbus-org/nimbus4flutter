@@ -34,7 +34,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
-
+/// Processing context of a request to the server.
 class RequestContext{
   Map<String,Object> inputs = Map();
   Map<String,Object> outputs = Map();
@@ -42,46 +42,65 @@ class RequestContext{
 
   RequestContext();
 
+  /// Get the input DTO of a specified API name.
   I getInput<I>(String api){
     return inputs[api] as I;
   }
+
+  /// Set the input DTO of a specified API name.
   void setInput(String api, Object input){
     inputs[api] = input;  
   }
 
+  /// Get the output DTO of a specified API name.
   O getOutput<O>(String api){
     return outputs[api] as O;
   }
+
+  /// Set the output DTO of a specified API name.
   void setOutput(String api, Object output){
     outputs[api] = output;  
   }
 
+  /// Get attribute of a specified name.
   T getAttribute<T>(String name){
     return attributes[name];
   }
+
+  /// Set attribute of a specified name.
   void setAttribute(String name, Object output){
     attributes[name] = output;  
   }
 }
 
+/// A class that abstracts the server API.
 abstract class Api<I,O>{
   final String _name;
+
   Api(
     String name
   ) : _name = name;
 
+  /// A logical name of API.
   get name => _name;
 
+  /// Get the input DTO that is the source of the request to the server.
   I getInput(RequestContext context);
+
+  /// Request to the server.
   Future<O> request(I input, RequestContext context);
 }
 
-
-
+/// Function to create a DTO for input and output to an API.
 typedef ApiInOutCreator<T> = T Function(RequestContext context);
+
+/// Function to process of building HttpClientRequest, an HTTP request to the server.
 typedef HttpClientRequestBuilder<I> = void Function(HttpClientRequest request, I input, Function(HttpClientRequest request, I input) serverBuilder);
+
+/// Function to process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
 typedef HttpClientResponseParser<O> = Future<void> Function(HttpClientResponse response, O output, Function(HttpClientResponse response, O output) serverParser);
 
+/// HTTP Methods enumeration.
 enum HttpMethod{
   GET,
   POST,
@@ -91,6 +110,45 @@ enum HttpMethod{
   DELETE
 }
 
+/// A single API.
+/// 
+/// For example
+/// ```dart
+/// Api api = SingleApi<DataSet,DataSet>(
+///   name: "get user",
+///   serverName: "local server",
+///   method:HttpMethod.POST
+///   path:"/users",
+///   inputCreator: (context){
+///     DataSet ds = DataSet("Condition");
+///     ds.setHeaderSchema(
+///       RecordSchema([FieldSchema<String>("id")])
+///     );
+///     return ds;
+///   },
+///   outputCreator: (context){
+///     DataSet ds = DataSet("User");
+///     ds.setHeaderSchema(
+///       RecordSchema(
+///         [
+///           FieldSchema<String>("name"),
+///           FieldSchema<int>("age"),
+///           FieldSchema<String>("tel")
+///         ]
+///       )
+///     );
+///     return ds;
+///   }
+/// );
+/// 
+/// RequestContext context = RequestContext();
+/// DataSet requestDs = api.getInput(context);
+/// requestDs.getHeader()["id"] = "0000001";
+/// 
+/// DataSet responseDs = await api.request(requestDs, context);
+/// 
+/// Record userRecord = responseDs.getHeader();
+/// ```
 @immutable
 class SingleApi<I,O> extends Api<I,O>{
   final String _serverName;
@@ -101,6 +159,16 @@ class SingleApi<I,O> extends Api<I,O>{
   final HttpClientRequestBuilder<I> _requestBuilder;
   final HttpClientResponseParser<O> _responseParser;
 
+  /// Construct API.
+  ///
+  /// In [name], specify a logical name of API.
+  /// In [serverName], specify a logical name of [ApiServer].
+  /// In [method], specify method of http.
+  /// In [path], specify the path that is part of the API URI.
+  /// In [inputCreator], specify the process to create a DTO for input to an API
+  /// In [outputCreator], specify the process to create a DTO for output to an API
+  /// In [requestBuilder], specify the process of building HttpClientRequest, an HTTP request to the server.
+  /// In [responseParser], specify the process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
   SingleApi(
     {
       @required String name,
@@ -170,11 +238,87 @@ class SingleApi<I,O> extends Api<I,O>{
   }
 }
 
+/// An aggregated API that calls multiple APIs in series.
+///
+/// For example
+/// ```dart
+/// Api api = SequencialApi<DataSet,List<Object>>(
+///   name:"user search and get attribute",
+///   apis:[
+///     SingleApi<DataSet,DataSet>(
+///       name:"user search",
+///       serverName:"local server",
+///       method:HttpMethod.POST,
+///       path:"/users/search",
+///       inputCreator: (context){
+///         DataSet ds = DataSet("UserSearchRequest");
+///         ds.setHeaderSchema(
+///           RecordSchema(
+///             [FieldSchema<String>("name")]
+///           )
+///         );
+///         return ds;
+///       },
+///       outputCreator: (context){
+///         DataSet ds = DataSet("UserSearchResponse");
+///         ds.setRecorListSchema(
+///           RecordSchema(
+///             [FieldSchema<String>("id")]
+///           )
+///         );
+///         return ds;
+///       }
+///     ),
+///     SingleApi<DataSet,DataSet>(
+///       name:"get attribute of users",
+///       serverName:"local server",
+///       method:HttpMethod.POST,
+///       path:"/users",
+///       inputCreator: (context){
+///         DataSet ds = DataSet("UserAttributeRequest");
+///         ds.setRecordListSchema(
+///           RecordSchema(
+///             [FieldSchema<String>("id")]
+///           )
+///         );
+///         ds.getRecordList().fromRecordList(
+///           ((context.getOutput("user search") as DataSet).getRecordList()
+///         );
+///         return ds;
+///       }
+///       outputCreator: (context){
+///         DataSet ds = DataSet("UserAttributeResponse");
+///         ds.setRecordListSchema(
+///           RecordSchema(
+///             [
+///               FieldSchema<String>("id"),
+///               FieldSchema<String>("name"),
+///               FieldSchema<int>("age"),
+///               FieldSchema<String>("tel")
+///             ]
+///           )
+///         );
+///         return ds;
+///       }
+///     )
+///   ],
+///   outputCreator : (context) => context.getOutput("get attribute of users")
+/// );
+/// 
+/// RequestContext context = RequestContext();
+/// DataSet requestDs = api.getInput(context);
+/// requestDs.getHeader()["name"] = "hoge";
+/// 
+/// DataSet responseDs = await api.request(requestDs, context);
+/// 
+/// RecordList userList = responseDs.getRecordList();
+/// ```
 @immutable
 class SequencialApi<I,O> extends Api<I,O>{
   final List<Api> _apis;
   final ApiInOutCreator<I> _inputCreator;
   final ApiInOutCreator<O> _outputCreator;
+
   SequencialApi(
     {
       @required String name,
@@ -207,6 +351,52 @@ class SequencialApi<I,O> extends Api<I,O>{
  }
 }
 
+/// An aggregated API that calls multiple APIs in parallel.
+///
+/// For example
+/// ```dart
+/// Api templateApi = SingleApi<DataSet,DataSet>(
+///   name: "get user",
+///   serverName: "local server",
+///   method:HttpMethod.POST
+///   path:"/users",
+///   inputCreator: (context){
+///     DataSet ds = DataSet("Condition");
+///     ds.setHeaderSchema(
+///       RecordSchema([FieldSchema<String>("id")])
+///     );
+///     return ds;
+///   },
+///   outputCreator: (context){
+///     DataSet ds = DataSet("User");
+///     ds.setHeaderSchema(
+///       RecordSchema(
+///         [
+///           FieldSchema<String>("name"),
+///           FieldSchema<int>("age"),
+///           FieldSchema<String>("tel")
+///         ]
+///       )
+///     );
+///     return ds;
+///   }
+/// );
+/// 
+/// Api api = ParallelApi<List<Object>>(
+///   name: "get users",
+///   apis: [templateApi, templateApi]
+/// );
+/// 
+/// RequestContext context = RequestContext();
+/// List<DataSet> requests = api.getInput(context).cast();
+/// requests[0].getHeader()["id"] = "0000001";
+/// requests[1].getHeader()["id"] = "0000002";
+/// 
+/// List<DataSet> responses = (await api.request(requests, context)).cast();
+/// 
+/// Record userRecord1 = responses[0].getHeader();
+/// Record userRecord2 = responses[1].getHeader();
+/// ```
 @immutable
 class ParallelApi<O> extends Api<List<Object>,O>{
   final List<Api> _apis;
