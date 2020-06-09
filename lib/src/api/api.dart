@@ -94,6 +94,9 @@ abstract class Api<I,O>{
 /// Function to create a DTO for input and output to an API.
 typedef ApiInOutCreator<T> = T Function(RequestContext context);
 
+/// Function to create a DTO for input and output to an API.
+typedef PathBuilder<I> = String Function(String path, I input, RequestContext context, Function(String path, I input) serverBuilder);
+
 /// Function to process of building HttpClientRequest, an HTTP request to the server.
 typedef HttpClientRequestBuilder<I> = void Function(HttpClientRequest request, I input, Function(HttpClientRequest request, I input) serverBuilder);
 
@@ -156,6 +159,7 @@ class SingleApi<I,O> extends Api<I,O>{
   final String _path;
   final ApiInOutCreator<I> _inputCreator;
   final ApiInOutCreator<O> _outputCreator;
+  final PathBuilder<I> _pathBuilder;
   final HttpClientRequestBuilder<I> _requestBuilder;
   final HttpClientResponseParser<O> _responseParser;
 
@@ -177,6 +181,7 @@ class SingleApi<I,O> extends Api<I,O>{
       @required String path,
       ApiInOutCreator<I> inputCreator,
       ApiInOutCreator<O> outputCreator,
+      PathBuilder<I> pathBuilder,
       HttpClientRequestBuilder<I> requestBuilder,
       HttpClientResponseParser<O> responseParser
     }
@@ -185,6 +190,7 @@ class SingleApi<I,O> extends Api<I,O>{
     _path = path,
     _inputCreator = inputCreator,
     _outputCreator = outputCreator,
+    _pathBuilder = pathBuilder,
     _requestBuilder = requestBuilder,
     _responseParser = responseParser,
     super(name);
@@ -197,24 +203,30 @@ class SingleApi<I,O> extends Api<I,O>{
     context?.setInput(name, context);
     Future<HttpClientRequest> req;
     ApiServer server = ApiRegistory.getApiServer(_serverName);
+    String path = _path;
+    if(_pathBuilder != null){
+      path = _pathBuilder(path, input, context, (path, input) => server.pathBuilder ?? server.pathBuilder(path, _method, input));
+    }else if(server.pathBuilder != null){
+      path = server.pathBuilder(path, _method, input);
+    }
     switch(_method){
     case HttpMethod.GET:
-      req = server.client.get(server.host, server.port, _path);
+      req = server.client.get(server.host, server.port, path);
       break;
     case HttpMethod.POST:
-      req = server.client.post(server.host, server.port, _path);
+      req = server.client.post(server.host, server.port, path);
       break;
     case HttpMethod.PUT:
-      server.client.put(server.host, server.port, _path);
+      server.client.put(server.host, server.port, path);
       break;
     case HttpMethod.PATCH:
-      server.client.patch(server.host, server.port, _path);
+      server.client.patch(server.host, server.port, path);
       break;
     case HttpMethod.HEAD:
-      server.client.head(server.host, server.port, _path);
+      server.client.head(server.host, server.port, path);
       break;
     case HttpMethod.DELETE:
-      server.client.delete(server.host, server.port, _path);
+      server.client.delete(server.host, server.port, path);
       break;
     }
     Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
