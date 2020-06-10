@@ -605,7 +605,7 @@ class RecordList implements List<Record>{
   /// 
   /// If [isDeep] is not set to true, the clone will be a shallow copy.
   RecordList clone([bool isDeep=false]){
-    RecordList list = new RecordList(_schema);
+    RecordList list = cloneEmpty();
     list.dataSet = _dataSet;
     if(isDeep){
       for(Record record in _records){
@@ -615,5 +615,9 @@ class RecordList implements List<Record>{
       list.addAll(this);
     }
     return this;
+  }
+
+  RecordList cloneEmpty(){
+    return RecordList(_schema);
   }
 }

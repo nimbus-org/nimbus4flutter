@@ -427,10 +427,14 @@ class Record{
 
   /// Clone the data.
   Record clone(){
-    Record record = Record(this._schema);
+    Record record = cloneEmpty();
     record.dataSet = _dataSet;
     record._values.addAll(_values);
     return record;
+  }
+
+  Record cloneEmpty(){
+    return Record(_schema);
   }
 
   /// Clear the data.

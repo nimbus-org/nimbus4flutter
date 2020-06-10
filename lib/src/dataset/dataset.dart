@@ -479,7 +479,7 @@ class DataSet{
   /// 
   /// If [isDeep] is not set to true, the clone of RecordList will be a shallow copy.
   DataSet clone([bool isDeep=false]){
-    DataSet ds = DataSet(name);
+    DataSet ds = cloneEmpty();
     _headers.forEach((key, value){
       ds._headers[key] = value.clone();
     });
@@ -493,6 +493,10 @@ class DataSet{
       ds._nestedRecordListSchemata[key] = value;
     });
     return ds;
+  }
+
+  DataSet cloneEmpty(){
+    return DataSet(name);
   }
 
 }
