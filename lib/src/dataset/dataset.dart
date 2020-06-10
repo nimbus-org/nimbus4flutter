@@ -242,7 +242,11 @@ class DataSet{
         (name, value){
           RecordList list = _recordLists[name?.length == 0 ? null : name];
           if(list != null){
-            list.fromMap(value);
+            if(value is List){
+              list.fromMap(value);
+            }else if(value is Map){
+              list.fromMapByMap(value);
+            }
           }
         }
       );

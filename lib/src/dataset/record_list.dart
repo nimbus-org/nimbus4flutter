@@ -278,6 +278,40 @@ class RecordList implements List<Record>{
     return this;
   }
 
+  /// Copies the value of the specified Map to this RecordList.
+  RecordList fromMapByMap(Map<dynamic, dynamic> map){
+    if(schema.hasPrimary && schema.primaryFields.length == 1){
+      map.forEach(
+        (key, value){
+          Record rec = createRecord();
+          schema.fields.forEach(
+            (field){
+              if(field.isPrimary){
+                rec.setByName(field.name, key);
+              }else{
+                if(value is Map){
+                  if(field.isRecord){
+                    rec.setByName(field.name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+                  }else{
+                    rec.fromMap(value);
+                  }
+                }else if(value is List && field.isRecordList){
+                  rec.setByName(field.name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
+                }else{
+                  rec.setByName(field.name, value);
+                }
+              }
+            }
+          );
+          add(rec);
+        }
+      );
+    }else{
+      return this;
+    }
+    return this;
+  }
+
   /// Output the value of this record to the List
   /// 
   /// If [hasNull] is set to false, fields with a value of null will not be output. this can be used to reduce the output when there is no need to tell that they are null.

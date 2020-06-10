@@ -81,6 +81,8 @@ class FieldSchema<T>{
   final bool _isPrimary;
   final bool _isOutput;
   final String _schema;
+  final bool _isRecord;
+  final bool _isRecordList;
 
   /// Define a normal field.
   /// 
@@ -107,6 +109,8 @@ class FieldSchema<T>{
       _fieldViewer = null,
       _isPrimary = isPrimary,
       _isOutput = isOutput,
+      _isRecord = false,
+      _isRecordList = false,
       _schema = null;
 
   /// Define the nested [Record] field.
@@ -130,6 +134,8 @@ class FieldSchema<T>{
       _outputConverter = null,
       _fieldViewer = null,
       _isOutput = isOutput,
+      _isRecord = true,
+      _isRecordList = false,
       _isPrimary = isPrimary;
   
   /// Define the nested [RecordList] field.
@@ -153,6 +159,8 @@ class FieldSchema<T>{
       _outputConverter = null,
       _fieldViewer = null,
       _isOutput = isOutput,
+      _isRecord = false,
+      _isRecordList = true,
       _isPrimary = isPrimary;
   
   /// Define the view field that has no entity.
@@ -179,6 +187,8 @@ class FieldSchema<T>{
       _inputConverter = null,
       _outputConverter = outputConverter,
       _isOutput = isOutput,
+      _isRecord = false,
+      _isRecordList = false,
       _isPrimary = false,
       _schema = null;
 
@@ -199,6 +209,12 @@ class FieldSchema<T>{
 
   /// The flag whether the field is a view or not
   get isView => _fieldViewer != null;
+
+  /// The flag whether the field is a [Record] or not
+  get isRecord => _isRecord;
+
+  /// The flag whether the field is a [RecordList] or not
+  get isRecordList => _isRecordList;
 
   /// The schema name when the field is a nested [Record] or [RecordList].
   get schema => _schema;

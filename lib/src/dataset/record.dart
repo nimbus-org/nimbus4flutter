@@ -259,10 +259,16 @@ class Record{
         if(containsName(name)){
           FieldSchema field = _schema.fieldMap[name];
           if(!field.isView){
-            if(field.type == Record){
-              setByName(name, _dataSet.createNestedRecord(field.schema).fromMap(value as Map<String,Object>));
-            }else if(field.type == RecordList){
-              setByName(name, _dataSet.createNestedRecordList(field.schema).fromMap(value as List<Map<String,Object>>));
+            if(field.isRecord){
+              if(value is Map){
+                setByName(name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+              }
+            }else if(field.isRecordList){
+              if(value is List){
+                setByName(name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
+              }else if(value is Map){
+                setByName(name, _dataSet.createNestedRecordList(field.schema).fromMapByMap(value));
+              }
             }else{
               setByName(name, value);
             }
@@ -287,9 +293,9 @@ class Record{
       if(!hasNull && value == null){
         continue;
       }
-      if(field.type == Record){
+      if(field.isRecord){
         value = (value as Record).toMap(hasNull : hasNull, toJsonType:toJsonType);
-      }else if(field.type == RecordList){
+      }else if(field.isRecordList){
         value = (value as RecordList).toMap(hasNull : hasNull, toJsonType:toJsonType);
       }
       map[field.name] = value;
@@ -309,9 +315,9 @@ class Record{
         if(field.isView){
           continue;
         }
-        if(field.type == Record){
+        if(field.isRecord){
           value = _dataSet.createNestedRecord(field.schema).fromList(value as List<Object>);
-        }else if(field.type == RecordList){
+        }else if(field.isRecordList){
           value = _dataSet.createNestedRecordList(field.schema).fromList(value as List<List<Object>>);
         }
         setByIndex(i, value);
@@ -329,13 +335,13 @@ class Record{
           continue;
         }
         Object value = list[fieldSchemaMap["index"]];
-        if(field.type == Record){
+        if(field.isRecord){
           value = _dataSet.createNestedRecord(field.schema).fromList(
             value as List<Object>,
             nestedRecordSchemaMap == null ? null : nestedRecordSchemaMap[fieldSchemaMap["schema"]],
             schemaMap
           );
-        }else if(field.type == RecordList){
+        }else if(field.isRecordList){
           value = _dataSet.createNestedRecordList(field.schema).fromList(
             value as List<List<Object>>,
             nestedRecordListSchemaMap == null ? null : nestedRecordListSchemaMap[fieldSchemaMap["schema"]],
@@ -359,9 +365,9 @@ class Record{
       }
       Object value = _getValue(field, toJsonType);
       if(value != null){
-        if(field.type == Record){
+        if(field.isRecord){
           value = (value as Record).toList(toJsonType:toJsonType);
-        }else if(field.type == RecordList){
+        }else if(field.isRecordList){
           value = (value as RecordList).toDeepList(toJsonType:toJsonType);
         }
       }
