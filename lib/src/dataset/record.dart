@@ -96,7 +96,7 @@ class Record{
   /// 
   /// If the type of the requested return value is different from the type of this field defined, then an output conversion is performed.
   /// And if you specify a field name that is not defined, it throws an exception.
-  T getByName<T>(String name){
+  T getByName<T>(String name,{bool isFormat=false}){
     FieldSchema fs = _schema.fieldMap[name];
     if(fs == null){
       throw Exception("The specified field does not exist. name=$name, schema=$_schema");
@@ -106,7 +106,7 @@ class Record{
     if(value == null){
       ret = null;
     }else{
-      if(value is T){
+      if(!isFormat && value is T){
         ret = value;
       }else{
         ret = fs.formatValue(value);
@@ -234,10 +234,10 @@ class Record{
       && !(value is Iterable<String>)
       && !(value is Iterable<dynamic>)
     ){
-      String str = getByName(field.name);
+      String str = getByName(field.name, isFormat: true);
       value = str;
     }else{
-      value = getByName(field.name);
+      value = getByName(field.name, isFormat: toJsonType);
     }
     return value;
   }
