@@ -229,10 +229,10 @@ class Record{
       && !(value is bool)
       && !(value is num)
       && !(value is String)
-      && !(value is List<int>)
-      && !(value is List<double>)
-      && !(value is List<String>)
-      && !(value is List<dynamic>)
+      && !(value is Iterable<int>)
+      && !(value is Iterable<double>)
+      && !(value is Iterable<String>)
+      && !(value is Iterable<dynamic>)
     ){
       String str = getByName(field.name);
       value = str;
