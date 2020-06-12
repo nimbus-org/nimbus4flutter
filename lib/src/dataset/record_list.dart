@@ -113,7 +113,7 @@ class RecordList implements List<Record>{
   Record get single => _records.single;
 
   @override
-  bool get isEmpty => _records.isNotEmpty;
+  bool get isEmpty => _records.isEmpty;
   
   @override
   bool get isNotEmpty => _records.isNotEmpty;
