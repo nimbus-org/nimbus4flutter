@@ -131,9 +131,6 @@ class RecordList implements List<Record>{
 
   @override
   void operator []=(int index, Record value){
-    if(value.schema != this.schema){
-      throw Exception("Schema is not match.new=${value.schema},this=$_schema");
-    }
     if(_schema.hasPrimary && _primaryKeyMap.containsKey(value.primaryKey)){
       Record removeRecord = _records[index];
       if(value.primaryKey != removeRecord.primaryKey){
@@ -154,9 +151,6 @@ class RecordList implements List<Record>{
 
   @override
   void add(Record value){
-    if(value.schema != _schema){
-      throw Exception("Schema is not match.new=${value.schema},this=$_schema");
-    }
     if(_schema.hasPrimary){
       if(_primaryKeyMap.containsKey(value.primaryKey)){
         throw Exception("Primary key is duplicate.primaryKey=${value.primaryKey}");
@@ -371,9 +365,6 @@ class RecordList implements List<Record>{
   
   @override
   void insert(int index, Record value) {
-    if(value.schema != _schema){
-      throw Exception("Schema is not match.new=${value.schema},this=$_schema");
-    }
     if(_schema.hasPrimary){
       if(_primaryKeyMap.containsKey(value.primaryKey)){
         throw Exception("Primary key is duplicate.primaryKey=${value.primaryKey}");
