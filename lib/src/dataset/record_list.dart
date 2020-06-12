@@ -73,7 +73,10 @@ class RecordList implements List<Record>{
   RecordSchema get schema => _schema;
 
   /// The parent DataSet, which is null if it is an independent RecordList.
-  set dataSet(ds) => _dataSet = ds;
+  set dataSet(ds){
+    _dataSet = ds;
+    _records?.forEach((record) => record.dataSet = ds);
+  }
   DataSet get dataSet => _dataSet;
 
   @override

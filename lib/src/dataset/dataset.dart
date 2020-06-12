@@ -167,6 +167,7 @@ class DataSet{
   /// 
   /// If you don't specify [name], you will set an unnamed header.
   void setHeader(Record record, [String name]){
+    record.dataSet = this;
     _headers[name] = record;
   }
 
@@ -180,8 +181,9 @@ class DataSet{
   /// Set the lsit of the specified name to the specified value.
   /// 
   /// If you don't specify [name], you will set an unnamed list.
-  void setRecordList(RecordList record, [String name]){
-    _recordLists[name] = record;
+  void setRecordList(RecordList list, [String name]){
+    list.dataSet = this;
+    _recordLists[name] = list;
   }
 
   /// Read [DataSet] from the Map which has [Record] and [RecordList] expressed in Map format.
