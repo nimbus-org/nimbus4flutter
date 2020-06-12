@@ -608,7 +608,7 @@ class RecordList implements List<Record>{
     }else{
       list.addAll(this);
     }
-    return this;
+    return list;
   }
 
   RecordList cloneEmpty(){
