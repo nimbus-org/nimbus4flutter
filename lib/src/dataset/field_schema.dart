@@ -193,31 +193,31 @@ class FieldSchema<T>{
       _schema = null;
 
   /// The name of the field.
-  get name => _name;
+  String get name => _name;
 
   /// The type of the field.
-  get type => _type;
+  Type get type => _type;
 
   /// The default value for the field.
-  get defaultValue => _defaultValue;
+  Object get defaultValue => _defaultValue;
 
   /// The flag whether the field is a component of the primary key or not.
-  get isPrimary => _isPrimary;
+  bool get isPrimary => _isPrimary;
 
   /// The flag whether the field is output or not.
-  get isOutput => _isOutput;
+  bool get isOutput => _isOutput;
 
   /// The flag whether the field is a view or not
-  get isView => _fieldViewer != null;
+  bool get isView => _fieldViewer != null;
 
   /// The flag whether the field is a [Record] or not
-  get isRecord => _isRecord;
+  bool get isRecord => _isRecord;
 
   /// The flag whether the field is a [RecordList] or not
-  get isRecordList => _isRecordList;
+  bool get isRecordList => _isRecordList;
 
   /// The schema name when the field is a nested [Record] or [RecordList].
-  get schema => _schema;
+  String get schema => _schema;
 
   /// The flag whether or not an input conversion is present in the field.
   bool get hasInputConverter => _inputConverter != null; 
