@@ -595,6 +595,18 @@ class RecordList implements List<Record>{
     return _records.whereType();
   }
 
+  void validate(){
+    _records.forEach((record)=>record.validate());
+  }
+  bool hasValidateError(){
+    for(Record record in _records){
+      if(record.hasValidateError()){
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// Clone the data.
   /// 
   /// If [isDeep] is not set to true, the clone will be a shallow copy.

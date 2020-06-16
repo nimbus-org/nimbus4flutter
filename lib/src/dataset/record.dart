@@ -55,6 +55,7 @@ class Record{
 
   final RecordSchema _schema;
   final Map<String,Object> _values;
+  final Map<String,List<String>> _validated = new Map();
   _RecordPrimaryKey _primaryKey;
   DataSet _dataSet;
 
@@ -65,6 +66,9 @@ class Record{
     _values = Map.fromIterable(schema.fields, key: (e) => e.name, value: (e) => e.defaultValue)
   {
     _primaryKey = schema.hasPrimary ? _RecordPrimaryKey(schema, _values) : null;
+    _schema.fields.forEach(
+      (field){if(field.hasValidator) _validated[field.name] = null;}
+    );
   }
 
   /// Schema definition
@@ -76,6 +80,9 @@ class Record{
   /// The parent DataSet, which is null if it is an independent record.
   DataSet get dataSet => _dataSet;
   set dataSet(ds) => _dataSet = ds;
+
+  Map<String,List<String>> get validated => Map.from(_validated);
+
 
   _RecordMapAccessOperator<T> call<T>() => _RecordMapAccessOperator(this);
 
@@ -149,6 +156,7 @@ class Record{
       }
     }
     _values[name] = value;
+    if(_validated.containsKey(name))_validated[name] = null;
   }
 
   /// Set the value of the specified field index.
@@ -162,6 +170,80 @@ class Record{
       throw Exception("The specified field does not exist. index=$index, schema=$_schema");
     }
     setByName(_schema.fields[index].name, value);
+  }
+
+  /// Validate the value of the specified field name.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field name that is not defined.
+  List<String> validateByName(String name){
+    FieldSchema fs = _schema.fieldMap[name];
+    if(fs == null){
+      throw Exception("The specified field does not exist. name=$name, schema=$_schema");
+    }
+    if(!_validated.containsKey(name)){
+      return null;
+    }
+    List<String> result = fs.validate(this, getByName(name));
+    _validated[name] = result == null ? List<String>.empty() : result;
+    return result;
+  }
+
+  /// Validate the value of the specified field index.
+  /// 
+  /// It throw exceptions in the following cases.
+  ///  * If you specify a field index that is not defined.
+  ///  * If you specify a field that is a view.
+  List<String> validateByIndex(int index){
+    if(index < 0 || index >= _schema.length){
+      throw Exception("The specified field does not exist. index=$index, schema=$_schema");
+    }
+    return validateByName(_schema.fields[index].name);
+  }
+
+  /// Validate the value of all field.
+  void validate(){
+    for(FieldSchema field in _schema.fields){
+      if(field.isView){
+        continue;
+      }else if(field.isRecord){
+        Record record = getByName(field.name);
+        if(record != null){
+          record.validate();
+        }
+      }else if(field.isRecordList){
+        RecordList recordList = getByName(field.name);
+        if(recordList != null){
+          recordList.validate();
+        }
+      }else{
+        validateByName(field.name);
+      }
+    }
+  }
+
+  bool hasValidateError(){
+    for(FieldSchema field in _schema.fields){
+      if(field.isView){
+        continue;
+      }else if(field.isRecord){
+        Record record = getByName(field.name);
+        if(record != null && record.hasValidateError()){
+          return true;
+        }
+      }else if(field.isRecordList){
+        RecordList recordList = getByName(field.name);
+        if(recordList != null && recordList.hasValidateError()){
+          return true;
+        }
+      }else{
+        List<String> validated = _validated[field.name];
+        if(validated != null && validated.length != 0){
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /// Create a nested [Record] with the specified field name.
@@ -441,6 +523,7 @@ class Record{
   /// The set schema information will not be cleared.
   void clear(){
     _schema.fields.forEach((field) => _values[field.name]=field.defaultValue);
+    _validated.forEach((name, value) {validated[name] = null;});
   }
 }
 

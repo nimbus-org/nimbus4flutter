@@ -40,6 +40,9 @@ typedef FieldConverter<I,O> = O Function(I input);
 /// This function is used for the view of a field.
 typedef FieldViewer<O> = O Function(DataSet ds, Record rec, O defaultValue);
 
+/// This function is used for input conversion and output conversion of a field.
+typedef FieldValidator<I> = List<String> Function(Record rec,I input);
+
 /// Define the schema for the fields in [Record] and [RecordList].
 /// 
 /// There are four different schemas, and there are different constructors for them.
@@ -77,6 +80,7 @@ class FieldSchema<T>{
   final Object _defaultValue;
   final FieldConverter<dynamic,T> _inputConverter;
   final FieldConverter<T,dynamic> _outputConverter;
+  final FieldValidator<T> _fieldValidator;
   final FieldViewer<T> _fieldViewer;
   final bool _isPrimary;
   final bool _isOutput;
@@ -98,6 +102,7 @@ class FieldSchema<T>{
       T defaultValue,
       FieldConverter<dynamic,T> inputConverter,
       FieldConverter<T,dynamic> outputConverter,
+      FieldValidator<T> fieldValidator,
       bool isPrimary = false,
       bool isOutput = true
     }
@@ -106,6 +111,7 @@ class FieldSchema<T>{
       _defaultValue = defaultValue,
       _inputConverter = inputConverter,
       _outputConverter = outputConverter,
+      _fieldValidator = fieldValidator,
       _fieldViewer = null,
       _isPrimary = isPrimary,
       _isOutput = isOutput,
@@ -132,6 +138,7 @@ class FieldSchema<T>{
       _defaultValue = null,
       _inputConverter = null,
       _outputConverter = null,
+      _fieldValidator = null,
       _fieldViewer = null,
       _isOutput = isOutput,
       _isRecord = true,
@@ -157,6 +164,7 @@ class FieldSchema<T>{
       _defaultValue = null,
       _inputConverter = null,
       _outputConverter = null,
+      _fieldValidator = null,
       _fieldViewer = null,
       _isOutput = isOutput,
       _isRecord = false,
@@ -186,6 +194,7 @@ class FieldSchema<T>{
       _defaultValue = defaultValue,
       _inputConverter = null,
       _outputConverter = outputConverter,
+      _fieldValidator = null,
       _isOutput = isOutput,
       _isRecord = false,
       _isRecordList = false,
@@ -224,6 +233,9 @@ class FieldSchema<T>{
 
   /// The flag whether or not an output conversion is present in the field.
   bool get hasOutputConverter => _outputConverter != null; 
+
+  /// The flag whether or not an validator is present in the field.
+  bool get hasValidator => _fieldValidator != null; 
   
   /// Determines if the specified object is assignable to the type of this field.
   bool instanceof(Object value) => value == null ? true : value is T;
@@ -279,6 +291,10 @@ class FieldSchema<T>{
     }else{
        return _outputConverter(value);
      }
+  }
+
+  List<String> validate(Record rec, T value){
+    return _fieldValidator == null ? null : _fieldValidator(rec, value);
   }
   
   /// If this field is a view, it will return a value using the specified [DataSet] and [Record].
