@@ -185,7 +185,7 @@ class Record{
       return null;
     }
     List<String> result = fs.validate(this, getByName(name));
-    _validated[name] = result == null ? List<String>.empty() : result;
+    _validated[name] = result == null ? List<String>() : result;
     return result;
   }
 
