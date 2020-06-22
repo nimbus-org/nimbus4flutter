@@ -248,10 +248,24 @@ class SingleApi<I,O> extends Api<I,O>{
     );
     O output = _outputCreator == null ? null : _outputCreator(context);
     return await resp.then((HttpClientResponse response) async{
-      if(_responseParser != null){
-        await _responseParser(response, output, (response, output) async => server.responseParser ?? await server.responseParser(response, _method, output));
-      }else if(server.responseParser != null){
-        await server.responseParser(response, _method, output);
+      try{
+        if(_responseParser != null){
+          await _responseParser(
+            response,
+            output,
+            (response, output) async {
+              try{
+                return server.responseParser ?? await server.responseParser(response, _method, output);
+              }catch(e){
+                throw e;
+              }
+            }
+          );
+        }else if(server.responseParser != null){
+          await server.responseParser(response, _method, output);
+        }
+      }catch(e){
+        throw e;
       }
       context?.setOutput(name, output);
       return output;
