@@ -247,31 +247,35 @@ class SingleApi<I,O> extends Api<I,O>{
       (e) => throw e
     );
     O output = _outputCreator == null ? null : _outputCreator(context);
-    return await resp.then((HttpClientResponse response) async{
-      try{
-        if(_responseParser != null){
-          await _responseParser(
-            response,
-            output,
-            (response, output) async {
-              try{
-                return server.responseParser ?? await server.responseParser(response, _method, output);
-              }catch(e){
-                throw e;
+    try{
+      return await resp.then((HttpClientResponse response) async{
+        try{
+          if(_responseParser != null){
+            await _responseParser(
+              response,
+              output,
+              (response, output) async {
+                try{
+                  return server.responseParser ?? await server.responseParser(response, _method, output);
+                }catch(e){
+                  throw e;
+                }
               }
-            }
-          );
-        }else if(server.responseParser != null){
-          await server.responseParser(response, _method, output);
+            );
+          }else if(server.responseParser != null){
+            await server.responseParser(response, _method, output);
+          }
+        }catch(e){
+          throw e;
         }
-      }catch(e){
-        throw e;
-      }
-      context?.setOutput(name, output);
-      return output;
-    }).catchError(
-      (e) => throw e
-    );
+        context?.setOutput(name, output);
+        return output;
+      }).catchError(
+        (e) => throw e
+      );
+    }catch(e){
+      throw e;
+    }
   }
 }
 
