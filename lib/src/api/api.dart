@@ -243,7 +243,9 @@ class SingleApi<I,O> extends Api<I,O>{
         server.requestBuilder(request, _method, input);
       }
       return request.close();
-    });
+    }).catchError(
+      (e) => throw e
+    );
     O output = _outputCreator == null ? null : _outputCreator(context);
     return await resp.then((HttpClientResponse response) async{
       if(_responseParser != null){
@@ -253,7 +255,9 @@ class SingleApi<I,O> extends Api<I,O>{
       }
       context?.setOutput(name, output);
       return output;
-    });
+    }).catchError(
+      (e) => throw e
+    );
   }
 }
 
