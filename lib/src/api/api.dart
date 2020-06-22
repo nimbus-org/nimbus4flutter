@@ -95,7 +95,7 @@ abstract class Api<I,O>{
 typedef ApiInOutCreator<T> = T Function(RequestContext context);
 
 /// Function to create a DTO for input and output to an API.
-typedef PathBuilder<I> = String Function(String path, I input, RequestContext context, Function(String path, I input) serverBuilder);
+typedef UriBuilder<I> = Uri Function(String scheme, String host, int port, String path, I input, RequestContext context, Function(String scheme, String host, int port, String path, I input) serverBuilder);
 
 /// Function to process of building HttpClientRequest, an HTTP request to the server.
 typedef HttpClientRequestBuilder<I> = void Function(HttpClientRequest request, I input, Function(HttpClientRequest request, I input) serverBuilder);
@@ -159,7 +159,7 @@ class SingleApi<I,O> extends Api<I,O>{
   final String _path;
   final ApiInOutCreator<I> _inputCreator;
   final ApiInOutCreator<O> _outputCreator;
-  final PathBuilder<I> _pathBuilder;
+  final UriBuilder<I> _uriBuilder;
   final HttpClientRequestBuilder<I> _requestBuilder;
   final HttpClientResponseParser<O> _responseParser;
 
@@ -181,7 +181,7 @@ class SingleApi<I,O> extends Api<I,O>{
       @required String path,
       ApiInOutCreator<I> inputCreator,
       ApiInOutCreator<O> outputCreator,
-      PathBuilder<I> pathBuilder,
+      UriBuilder<I> uriBuilder,
       HttpClientRequestBuilder<I> requestBuilder,
       HttpClientResponseParser<O> responseParser
     }
@@ -190,7 +190,7 @@ class SingleApi<I,O> extends Api<I,O>{
     _path = path,
     _inputCreator = inputCreator,
     _outputCreator = outputCreator,
-    _pathBuilder = pathBuilder,
+    _uriBuilder = uriBuilder,
     _requestBuilder = requestBuilder,
     _responseParser = responseParser,
     super(name);
@@ -203,18 +203,19 @@ class SingleApi<I,O> extends Api<I,O>{
     context?.setInput(name, context);
     Future<HttpClientRequest> req;
     ApiServer server = ApiRegistory.getApiServer(_serverName);
-    String path = _path;
-    if(_pathBuilder != null){
-      path = _pathBuilder(path, input, context, (path, input) => server.pathBuilder ?? server.pathBuilder(path, _method, input));
-    }else if(server.pathBuilder != null){
-      path = server.pathBuilder(path, _method, input);
+    Uri uri;
+    if(_uriBuilder != null){
+      uri = _uriBuilder(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input));
+    }else if(server.uriBuilder != null){
+      uri = server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input);
+    }else{
+      uri = Uri(
+        host: server.host,
+        port: server.port,
+        scheme: server.scheme,
+        path: _path
+      );
     }
-    Uri uri = Uri(
-      host: server.host,
-      port: server.port,
-      scheme: server.scheme,
-      path: path
-    );
     switch(_method){
     case HttpMethod.GET:
       req = server.client.getUrl(uri);

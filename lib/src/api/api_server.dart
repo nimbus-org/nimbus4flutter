@@ -36,7 +36,7 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 typedef HttpClientBuilder = void Function(HttpClient client);
 
-typedef ApiServerPathBuilder = String Function(String path, HttpMethod method, Object input);
+typedef ApiServerUriBuilder = Uri Function(String scheme, String host, int port, String path, HttpMethod method, Object input);
 
 typedef ApiServerHttpClientRequestBuilder = void Function(HttpClientRequest request, HttpMethod method, Object input);
 
@@ -83,7 +83,7 @@ class ApiServer{
   final String _host;
   final String _scheme;
   final int _port;
-  final ApiServerPathBuilder _pathBuilder;
+  final ApiServerUriBuilder _uriBuilder;
   final ApiServerHttpClientRequestBuilder _requestBuilder;
   final ApiServerHttpClientResponseParser _responseParser;
 
@@ -104,7 +104,7 @@ class ApiServer{
       int port,
       String scheme = "http",
       HttpClientBuilder builder,
-      ApiServerPathBuilder pathBuilder,
+      ApiServerUriBuilder uriBuilder,
       ApiServerHttpClientRequestBuilder requestBuilder,
       ApiServerHttpClientResponseParser responseParser
     }
@@ -112,7 +112,7 @@ class ApiServer{
     _host = host,
     _port = port,
     _scheme = scheme,
-    _pathBuilder = pathBuilder,
+    _uriBuilder = uriBuilder,
     _requestBuilder = requestBuilder,
     _responseParser = responseParser
   {
@@ -135,7 +135,7 @@ class ApiServer{
   HttpClient get client => _client;
 
   /// The process of building path, an HTTP request to the server.
-  ApiServerPathBuilder get pathBuilder => _pathBuilder;
+  ApiServerUriBuilder get uriBuilder => _uriBuilder;
 
   /// The process of building HttpClientRequest, an HTTP request to the server.
   ApiServerHttpClientRequestBuilder get requestBuilder => _requestBuilder;
