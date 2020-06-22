@@ -49,3 +49,4 @@ export 'src/dataset/dataset.dart';
 export 'src/api/api.dart';
 export 'src/api/api_server.dart';
 export 'src/api/api_registory.dart';
+export 'src/settings/settings.dart';
