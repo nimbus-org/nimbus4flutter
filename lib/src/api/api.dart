@@ -36,40 +36,41 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 /// Processing context of a request to the server.
 class RequestContext{
-  Map<String,Object> inputs = Map();
-  Map<String,Object> outputs = Map();
-  Map<String,Object> attributes = Map();
+  Map<String,Object> _inputs = Map();
+  Map<String,Object> _outputs = Map();
+  Map<String,Object> _attributes = Map();
+  dynamic exception;
 
   RequestContext();
 
   /// Get the input DTO of a specified API name.
   I getInput<I>(String api){
-    return inputs[api] as I;
+    return _inputs[api] as I;
   }
 
   /// Set the input DTO of a specified API name.
   void setInput(String api, Object input){
-    inputs[api] = input;  
+    _inputs[api] = input;  
   }
 
   /// Get the output DTO of a specified API name.
   O getOutput<O>(String api){
-    return outputs[api] as O;
+    return _outputs[api] as O;
   }
 
   /// Set the output DTO of a specified API name.
   void setOutput(String api, Object output){
-    outputs[api] = output;  
+    _outputs[api] = output;  
   }
 
   /// Get attribute of a specified name.
   T getAttribute<T>(String name){
-    return attributes[name];
+    return _attributes[name];
   }
 
   /// Set attribute of a specified name.
   void setAttribute(String name, Object output){
-    attributes[name] = output;  
+    _attributes[name] = output;  
   }
 }
 
@@ -199,7 +200,7 @@ class SingleApi<I,O> extends Api<I,O>{
   I getInput(RequestContext context) => _inputCreator == null ? null : _inputCreator(context);
 
   @override
-  Future<O> request(I input, RequestContext context) async{
+  Future<O> request(I input, RequestContext context){
     context?.setInput(name, context);
     Future<HttpClientRequest> req;
     ApiServer server = ApiRegistory.getApiServer(_serverName);
@@ -224,16 +225,16 @@ class SingleApi<I,O> extends Api<I,O>{
       req = server.client.postUrl(uri);
       break;
     case HttpMethod.PUT:
-      server.client.putUrl(uri);
+      req = server.client.putUrl(uri);
       break;
     case HttpMethod.PATCH:
-      server.client.patchUrl(uri);
+      req = server.client.patchUrl(uri);
       break;
     case HttpMethod.HEAD:
-      server.client.headUrl(uri);
+      req = server.client.headUrl(uri);
       break;
     case HttpMethod.DELETE:
-      server.client.deleteUrl(uri);
+      req = server.client.deleteUrl(uri);
       break;
     }
     Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
@@ -244,38 +245,33 @@ class SingleApi<I,O> extends Api<I,O>{
       }
       return request.close();
     }).catchError(
-      (e) => throw e
-    );
+      (e) => context.exception = e
+    ).whenComplete(() {if(context.exception != null) throw context.exception;});
+    
     O output = _outputCreator == null ? null : _outputCreator(context);
-    try{
-      return await resp.then((HttpClientResponse response) async{
-        try{
-          if(_responseParser != null){
-            await _responseParser(
-              response,
-              output,
-              (response, output) async {
-                try{
-                  return server.responseParser ?? await server.responseParser(response, _method, output);
-                }catch(e){
-                  throw e;
-                }
-              }
-            );
-          }else if(server.responseParser != null){
-            await server.responseParser(response, _method, output);
-          }
-        }catch(e){
-          throw e;
+    return resp.then((HttpClientResponse response) async{
+      try{
+        if(_responseParser != null){
+          await _responseParser(
+            response,
+            output,
+            (response, output) {
+              return server.responseParser ?? server.responseParser(response, _method, output)
+                .catchError((e) => (e) => context.exception = e);
+            }
+          );
+          
+        }else if(server.responseParser != null){
+          await server.responseParser(response, _method, output);
         }
-        context?.setOutput(name, output);
-        return output;
-      }).catchError(
-        (e) => throw e
-      );
-    }catch(e){
-      throw e;
-    }
+      }catch(e){
+        context.exception = e;
+      }
+      context?.setOutput(name, output);
+      return output;
+    }).catchError(
+      (e) => context.exception = e
+    ).whenComplete(() {if(context.exception != null) throw context.exception;});
   }
 }
 

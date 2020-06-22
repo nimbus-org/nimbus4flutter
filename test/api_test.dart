@@ -82,6 +82,76 @@ void main() {
       expect(response.getHeader("User")["age"], 20);
       httpServer.close(force: true);
     });
+    test('single api get error on reuqest test', () async{
+      DataSet responseDs = DataSet("testResponse");
+      responseDs.setHeaderSchema(
+        RecordSchema(
+          [
+            FieldSchema<String>("name"),
+            FieldSchema<int>("age")
+          ]
+        ),
+        "User"
+      );
+      HttpServer httpServer = await HttpServer.bind(InternetAddress.anyIPv6, 80);
+      ApiRegistory.registApi(
+        SingleApi<dynamic,DataSet>(
+          name:"test/user",
+          serverName:"test",
+          method:HttpMethod.GET,
+          path:"/user",
+          outputCreator: (context) => responseDs.clone(true),
+          requestBuilder: (request, input, serverBuilder) {
+            throw new Exception("test");
+          },
+        )
+      );
+      Api api = ApiRegistory.getApi("test/user");
+      try{
+        await api.request(null, RequestContext());
+        fail("exception can not catch");
+      }catch(e){
+        expect(e.message, "test");
+      }
+      httpServer.close(force: true);
+    });
+    test('single api get error on response test', () async{
+      String requestedUri;
+      DataSet responseDs = DataSet("testResponse");
+      responseDs.setHeaderSchema(
+        RecordSchema(
+          [
+            FieldSchema<String>("name"),
+            FieldSchema<int>("age")
+          ]
+        ),
+        "User"
+      );
+      HttpServer httpServer = await HttpServer.bind(InternetAddress.anyIPv6, 80);
+      httpServer.listen((HttpRequest request) {
+          requestedUri = request.requestedUri.toString();
+          request.response.statusCode = 404;
+          request.response.close();
+      });
+      ApiRegistory.registApi(
+        SingleApi<dynamic,DataSet>(
+          name:"test/user",
+          serverName:"test",
+          method:HttpMethod.GET,
+          path:"/user",
+          outputCreator: (context) => responseDs.clone(true)
+        )
+      );
+      Api api = ApiRegistory.getApi("test/user");
+      try{
+        await api.request(null, RequestContext());
+        fail("exception can not catch");
+      }catch(e){
+        expect(requestedUri, "http://localhost/user");
+        expect(e.message, "error status = 404");
+      }
+      httpServer.close(force: true);
+    });
     test('single api post test', () async{
       String requestedUri;
       DataSet requestedDataSet;
