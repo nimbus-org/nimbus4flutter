@@ -81,6 +81,7 @@ typedef ApiServerHttpClientResponseParser = Future<void> Function(HttpClientResp
 class ApiServer{
   final String _name;
   final String _host;
+  final String _scheme;
   final int _port;
   final ApiServerPathBuilder _pathBuilder;
   final ApiServerHttpClientRequestBuilder _requestBuilder;
@@ -101,6 +102,7 @@ class ApiServer{
       @required String name,
       @required String host,
       int port,
+      String scheme = "http",
       HttpClientBuilder builder,
       ApiServerPathBuilder pathBuilder,
       ApiServerHttpClientRequestBuilder requestBuilder,
@@ -109,6 +111,7 @@ class ApiServer{
   ):_name= name,
     _host = host,
     _port = port,
+    _scheme = scheme,
     _pathBuilder = pathBuilder,
     _requestBuilder = requestBuilder,
     _responseParser = responseParser
@@ -124,6 +127,9 @@ class ApiServer{
   
   /// The port of the server.
   int get port => _port;
+
+  /// The scheme of the uri.
+  String get scheme => _scheme;
 
   /// HttpClient to communicate with the server.
   HttpClient get client => _client;

@@ -209,24 +209,30 @@ class SingleApi<I,O> extends Api<I,O>{
     }else if(server.pathBuilder != null){
       path = server.pathBuilder(path, _method, input);
     }
+    Uri uri = Uri(
+      host: server.host,
+      port: server.port,
+      scheme: server.scheme,
+      path: path
+    );
     switch(_method){
     case HttpMethod.GET:
-      req = server.client.get(server.host, server.port, path);
+      req = server.client.getUrl(uri);
       break;
     case HttpMethod.POST:
-      req = server.client.post(server.host, server.port, path);
+      req = server.client.postUrl(uri);
       break;
     case HttpMethod.PUT:
-      server.client.put(server.host, server.port, path);
+      server.client.putUrl(uri);
       break;
     case HttpMethod.PATCH:
-      server.client.patch(server.host, server.port, path);
+      server.client.patchUrl(uri);
       break;
     case HttpMethod.HEAD:
-      server.client.head(server.host, server.port, path);
+      server.client.headUrl(uri);
       break;
     case HttpMethod.DELETE:
-      server.client.delete(server.host, server.port, path);
+      server.client.deleteUrl(uri);
       break;
     }
     Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
