@@ -82,6 +82,34 @@ void main() {
       expect(response.getHeader("User")["age"], 20);
       httpServer.close(force: true);
     });
+    test('single api get error on connected test', () async{
+      DataSet responseDs = DataSet("testResponse");
+      responseDs.setHeaderSchema(
+        RecordSchema(
+          [
+            FieldSchema<String>("name"),
+            FieldSchema<int>("age")
+          ]
+        ),
+        "User"
+      );
+      ApiRegistory.registApi(
+        SingleApi<dynamic,DataSet>(
+          name:"test/user",
+          serverName:"test",
+          method:HttpMethod.GET,
+          path:"/user",
+          outputCreator: (context) => responseDs.clone(true),
+        )
+      );
+      Api api = ApiRegistory.getApi("test/user");
+      try{
+        await api.request(null, RequestContext());
+        fail("exception can not catch");
+      }catch(e){
+        expect(e is SocketException, true);
+      }
+    });
     test('single api get error on reuqest test', () async{
       DataSet responseDs = DataSet("testResponse");
       responseDs.setHeaderSchema(

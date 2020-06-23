@@ -116,7 +116,43 @@ class Record{
       if(!isFormat && value is T){
         ret = value;
       }else{
-        ret = fs.formatValue(value);
+        value = fs.formatValue(value);
+        if(value is T){
+          ret = value;
+        }else{
+          if(value is String){
+            if(T == int){
+              ret = int.parse(value) as T;
+            }else if(T == double){
+              ret = double.parse(value) as T;
+            }else if(T == bool){
+              value = (value as String).toLowerCase().trim();
+              ret = (value == "true" || value == "on" || value == "yes") as T;
+            }else{
+              ret = value as T;
+            }
+          }else if(value is bool){
+            if(T == int){
+              ret = (value == true ? 1 : 0) as T;
+            }else if(T == double){
+              ret = (value == true ? 1.0 : 0.0) as T;
+            }else if(T == String){
+              ret = (value == true ? "true" : "false") as T;
+            }else{
+              ret = value as T;
+            }
+          }else if(value is num){
+            if(T == int){
+              ret = (value.toInt()) as T;
+            }else if(T == double){
+              ret = (value.toDouble()) as T;
+            }else if(T == String){
+              ret = (value.toString()) as T;
+            }else{
+              ret = value as T;
+            }
+          }
+        }
       }
     }
     return ret;
