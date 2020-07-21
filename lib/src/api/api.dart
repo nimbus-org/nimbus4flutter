@@ -30,7 +30,6 @@
  * policies, either expressed or implied, of the Nimbus Project.
  */
 
-import 'dart:io';
 import 'dart:async';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
@@ -98,12 +97,6 @@ typedef ApiInOutCreator<T> = T Function(RequestContext context);
 /// Function to create a DTO for input and output to an API.
 typedef UriBuilder<I> = Uri Function(String scheme, String host, int port, String path, I input, RequestContext context, Function(String scheme, String host, int port, String path, I input) serverBuilder);
 
-/// Function to process of building HttpClientRequest, an HTTP request to the server.
-typedef HttpClientRequestBuilder<I> = void Function(HttpClientRequest request, I input, Function(HttpClientRequest request, I input) serverBuilder);
-
-/// Function to process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
-typedef HttpClientResponseParser<O> = Future<void> Function(HttpClientResponse response, O output, Function(HttpClientResponse response, O output) serverParser);
-
 /// HTTP Methods enumeration.
 enum HttpMethod{
   GET,
@@ -112,167 +105,6 @@ enum HttpMethod{
   HEAD,
   PATCH,
   DELETE
-}
-
-/// A single API.
-/// 
-/// For example
-/// ```dart
-/// Api api = SingleApi<DataSet,DataSet>(
-///   name: "get user",
-///   serverName: "local server",
-///   method:HttpMethod.POST
-///   path:"/users",
-///   inputCreator: (context){
-///     DataSet ds = DataSet("Condition");
-///     ds.setHeaderSchema(
-///       RecordSchema([FieldSchema<String>("id")])
-///     );
-///     return ds;
-///   },
-///   outputCreator: (context){
-///     DataSet ds = DataSet("User");
-///     ds.setHeaderSchema(
-///       RecordSchema(
-///         [
-///           FieldSchema<String>("name"),
-///           FieldSchema<int>("age"),
-///           FieldSchema<String>("tel")
-///         ]
-///       )
-///     );
-///     return ds;
-///   }
-/// );
-/// 
-/// RequestContext context = RequestContext();
-/// DataSet requestDs = api.getInput(context);
-/// requestDs.getHeader()["id"] = "0000001";
-/// 
-/// DataSet responseDs = await api.request(requestDs, context);
-/// 
-/// Record userRecord = responseDs.getHeader();
-/// ```
-@immutable
-class SingleApi<I,O> extends Api<I,O>{
-  final String _serverName;
-  final HttpMethod _method;
-  final String _path;
-  final ApiInOutCreator<I> _inputCreator;
-  final ApiInOutCreator<O> _outputCreator;
-  final UriBuilder<I> _uriBuilder;
-  final HttpClientRequestBuilder<I> _requestBuilder;
-  final HttpClientResponseParser<O> _responseParser;
-
-  /// Construct API.
-  ///
-  /// In [name], specify a logical name of API.
-  /// In [serverName], specify a logical name of [ApiServer].
-  /// In [method], specify method of http.
-  /// In [path], specify the path that is part of the API URI.
-  /// In [inputCreator], specify the process to create a DTO for input to an API
-  /// In [outputCreator], specify the process to create a DTO for output to an API
-  /// In [requestBuilder], specify the process of building HttpClientRequest, an HTTP request to the server.
-  /// In [responseParser], specify the process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
-  SingleApi(
-    {
-      @required String name,
-      @required String  serverName,
-      @required HttpMethod method,
-      @required String path,
-      ApiInOutCreator<I> inputCreator,
-      ApiInOutCreator<O> outputCreator,
-      UriBuilder<I> uriBuilder,
-      HttpClientRequestBuilder<I> requestBuilder,
-      HttpClientResponseParser<O> responseParser
-    }
-  ) : _serverName = serverName,
-    _method = method,
-    _path = path,
-    _inputCreator = inputCreator,
-    _outputCreator = outputCreator,
-    _uriBuilder = uriBuilder,
-    _requestBuilder = requestBuilder,
-    _responseParser = responseParser,
-    super(name);
-  
-  @override
-  I getInput(RequestContext context) => _inputCreator == null ? null : _inputCreator(context);
-
-  @override
-  Future<O> request(I input, RequestContext context){
-    context?.setInput(name, context);
-    Future<HttpClientRequest> req;
-    ApiServer server = ApiRegistory.getApiServer(_serverName);
-    Uri uri;
-    if(_uriBuilder != null){
-      uri = _uriBuilder(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input));
-    }else if(server.uriBuilder != null){
-      uri = server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input);
-    }else{
-      uri = Uri(
-        host: server.host,
-        port: server.port,
-        scheme: server.scheme,
-        path: _path
-      );
-    }
-    switch(_method){
-    case HttpMethod.GET:
-      req = server.client.getUrl(uri);
-      break;
-    case HttpMethod.POST:
-      req = server.client.postUrl(uri);
-      break;
-    case HttpMethod.PUT:
-      req = server.client.putUrl(uri);
-      break;
-    case HttpMethod.PATCH:
-      req = server.client.patchUrl(uri);
-      break;
-    case HttpMethod.HEAD:
-      req = server.client.headUrl(uri);
-      break;
-    case HttpMethod.DELETE:
-      req = server.client.deleteUrl(uri);
-      break;
-    }
-    Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
-      if(_requestBuilder != null){
-        _requestBuilder(request, input, (request, input) => server.requestBuilder ?? server.requestBuilder(request, _method, input));
-      }else if(server.requestBuilder != null){
-        server.requestBuilder(request, _method, input);
-      }
-      return request.close();
-    }).catchError(
-      (e) => context.exception = e
-    ).whenComplete(() {if(context.exception != null) throw context.exception;});
-    
-    O output = _outputCreator == null ? null : _outputCreator(context);
-    return resp.then((HttpClientResponse response) async{
-      try{
-        if(_responseParser != null){
-          await _responseParser(
-            response,
-            output,
-            (response, output) {
-              return server.responseParser ?? server.responseParser(response, _method, output)
-                .catchError((e) => (e) => context.exception = e);
-            }
-          );
-          
-        }else if(server.responseParser != null){
-          await server.responseParser(response, _method, output);
-        }
-      }catch(e){
-        context.exception = e;
-      }
-      context?.setOutput(name, output);
-      return output;
-    }).catchError(
-      (e) => context.exception = e
-    ).whenComplete(() {if(context.exception != null) throw context.exception;});
-  }
 }
 
 /// An aggregated API that calls multiple APIs in series.

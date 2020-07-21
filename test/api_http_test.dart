@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
@@ -8,7 +9,7 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 void main() {
   setUp((){
       ApiRegistory.registApiServer(
-        ApiServer(
+        ApiServerHttp(
           name : "test",
           host : "localhost",
           requestBuilder: (request, method, input) {
@@ -17,14 +18,13 @@ void main() {
             case HttpMethod.PATCH:
             case HttpMethod.PUT:
               DataSet ds = input as DataSet;
-              request.headers.contentType = new ContentType("application", "json", charset: "utf-8");
-              request.write(
-                JsonEncoder().convert(ds.toMap(toJsonType: true))
-              );
+              request.headers["Content-Type"] = "application/json; charset=utf-8";
+              (request as Request).body = JsonEncoder().convert(ds.toMap(toJsonType: true));
               break;
             default:
               break;
             }
+            return;
           },
           responseParser: (response, method, output) async{
             if(response.statusCode != 200){
@@ -32,7 +32,7 @@ void main() {
             }
             if(output != null){
               DataSet ds = output as DataSet;
-              ds.fromMap(JsonDecoder().convert(await response.transform(Utf8Decoder()).join()));
+              ds.fromMap(JsonDecoder().convert(await (response as StreamedResponse).stream.transform(Utf8Decoder()).join()));
             }
           },
         )
@@ -67,7 +67,7 @@ void main() {
           request.response.close();
       });
       ApiRegistory.registApi(
-        SingleApi<dynamic,DataSet>(
+        ApiHttp<dynamic,DataSet,Request,StreamedResponse>(
           name:"test/user",
           serverName:"test",
           method:HttpMethod.GET,
@@ -94,7 +94,7 @@ void main() {
         "User"
       );
       ApiRegistory.registApi(
-        SingleApi<dynamic,DataSet>(
+        ApiHttp<dynamic,DataSet,Request,StreamedResponse>(
           name:"test/user",
           serverName:"test",
           method:HttpMethod.GET,
@@ -123,7 +123,7 @@ void main() {
       );
       HttpServer httpServer = await HttpServer.bind(InternetAddress.anyIPv6, 80);
       ApiRegistory.registApi(
-        SingleApi<dynamic,DataSet>(
+        ApiHttp<dynamic,DataSet,Request,StreamedResponse>(
           name:"test/user",
           serverName:"test",
           method:HttpMethod.GET,
@@ -162,7 +162,7 @@ void main() {
           request.response.close();
       });
       ApiRegistory.registApi(
-        SingleApi<dynamic,DataSet>(
+        ApiHttp<dynamic,DataSet,Request,StreamedResponse>(
           name:"test/user",
           serverName:"test",
           method:HttpMethod.GET,
@@ -215,7 +215,7 @@ void main() {
           request.response.close();
       });
       ApiRegistory.registApi(
-        SingleApi<DataSet,DataSet>(
+        ApiHttp<DataSet,DataSet,Request,StreamedResponse>(
           name:"test/user",
           serverName:"test",
           method:HttpMethod.POST,
@@ -274,7 +274,7 @@ void main() {
         SequencialApi<DataSet,List<Object>>(
           name:"test/users",
           apis:[
-            SingleApi<DataSet,DataSet>(
+            ApiHttp<DataSet,DataSet,Request,StreamedResponse>(
               name:"test/user[0]",
               serverName:"test",
               method:HttpMethod.POST,
@@ -282,7 +282,7 @@ void main() {
               inputCreator: (context) => requestDs.clone(true),
               outputCreator: (context) => responseDs.clone(true)
             ),
-            SingleApi<DataSet,DataSet>(
+            ApiHttp<DataSet,DataSet,Request,StreamedResponse>(
               name:"test/user[1]",
               serverName:"test",
               method:HttpMethod.POST,
@@ -294,7 +294,7 @@ void main() {
               },
               outputCreator: (context) => responseDs.clone(true)
             ),
-            SingleApi<DataSet,DataSet>(
+            ApiHttp<DataSet,DataSet,Request,StreamedResponse>(
               name:"test/user[2]",
               serverName:"test",
               method:HttpMethod.POST,
@@ -366,7 +366,7 @@ void main() {
           request.response.write(JsonEncoder().convert(ds.toMap(toJsonType: true)));
           request.response.close();
       });
-      Api templateApi = SingleApi<DataSet,DataSet>(
+      Api templateApi = ApiHttp<DataSet,DataSet,Request,StreamedResponse>(
         name:"test/user",
         serverName:"test",
         method:HttpMethod.POST,
