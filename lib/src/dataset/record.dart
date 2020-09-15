@@ -362,9 +362,20 @@ class Record{
 
   /// Copies the value of the specified record to this record.
   Record fromRecord(Record record){
-    for(String name in _schema.fieldMap.keys){
-      if(record.containsName(name)){
-        this[name] = record[name]; 
+    if(record == null){
+      return this;
+    }
+    if(_schema.length <= record._schema.length){
+      for(String name in _schema.fieldMap.keys){
+        if(record.containsName(name)){
+          this[name] = record[name]; 
+        }
+      }
+    }else{
+      for(String name in record._schema.fieldMap.keys){
+        if(containsName(name)){
+          this[name] = record[name]; 
+        }
       }
     }
     return this;
@@ -372,28 +383,55 @@ class Record{
 
   /// Copies the value of the specified Map to this record.
   Record fromMap(Map<String,Object> map){
-    map.forEach(
-      (name, value){
-        if(containsName(name)){
-          FieldSchema field = _schema.fieldMap[name];
-          if(!field.isView){
-            if(field.isRecord){
-              if(value is Map){
-                setByName(name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+    if(map == null){
+      return this;
+    }
+    if(_schema.length <= map.length){
+      for(String name in _schema.fieldMap.keys){
+        if(map.containsKey(name)){
+            Object value = map[name];
+            FieldSchema field = _schema.fieldMap[name];
+            if(!field.isView){
+              if(field.isRecord){
+                if(value is Map){
+                  setByName(name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+                }
+              }else if(field.isRecordList){
+                if(value is List){
+                  setByName(name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
+                }else if(value is Map){
+                  setByName(name, _dataSet.createNestedRecordList(field.schema).fromMapByMap(value));
+                }
+              }else{
+                setByName(name, value);
               }
-            }else if(field.isRecordList){
-              if(value is List){
-                setByName(name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
-              }else if(value is Map){
-                setByName(name, _dataSet.createNestedRecordList(field.schema).fromMapByMap(value));
+            }
+        }
+      }
+    }else{
+      map.forEach(
+        (name, value){
+          if(containsName(name)){
+            FieldSchema field = _schema.fieldMap[name];
+            if(!field.isView){
+              if(field.isRecord){
+                if(value is Map){
+                  setByName(name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+                }
+              }else if(field.isRecordList){
+                if(value is List){
+                  setByName(name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
+                }else if(value is Map){
+                  setByName(name, _dataSet.createNestedRecordList(field.schema).fromMapByMap(value));
+                }
+              }else{
+                setByName(name, value);
               }
-            }else{
-              setByName(name, value);
             }
           }
         }
-      }
-    );
+      );
+    }
     return this;
   }
 
@@ -426,6 +464,9 @@ class Record{
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
   Record fromList(List<Object> list,[Map<String,Object> recordSchemaMap, Map<String,Object> schemaMap]){
+    if(list == null){
+      return this;
+    }
     if(recordSchemaMap == null){
       for(int i = 0; i < min(list.length, _schema.length); i++){
         FieldSchema field = _schema.fields[i];

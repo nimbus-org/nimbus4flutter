@@ -253,6 +253,9 @@ class RecordList implements List<Record>{
 
   /// Copies the value of the specified RecordList to this RecordList.
   RecordList fromRecordList(RecordList list){
+    if(list == null){
+      return this;
+    }
     list.forEach(
       (value){
         Record rec = createRecord();
@@ -265,6 +268,9 @@ class RecordList implements List<Record>{
 
   /// Copies the value of the specified List to this RecordList.
   RecordList fromMap(List<dynamic> list){
+    if(list == null){
+      return this;
+    }
     list.forEach(
       (value){
         Record rec = createRecord();
@@ -277,6 +283,9 @@ class RecordList implements List<Record>{
 
   /// Copies the value of the specified Map to this RecordList.
   RecordList fromMapByMap(Map<dynamic, dynamic> map){
+    if(map == null){
+      return this;
+    }
     if(schema.hasPrimary && schema.primaryFields.length == 1){
       map.forEach(
         (key, value){
@@ -326,6 +335,9 @@ class RecordList implements List<Record>{
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
   RecordList fromList(List<List<Object>> list,[Map<String,Object> recordListSchemaMap, Map<String,Object> schemaMap]){
+    if(list == null){
+      return this;
+    }
     list.forEach(
       (value){
         Record rec = createRecord();

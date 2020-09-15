@@ -222,6 +222,9 @@ class DataSet{
   ///  }
   /// ```
   DataSet fromMap(Map<String,Object> map){
+    if(map == null){
+      return this;
+    }
     MapEntry dsEntry = map.entries.first;
     if(name == null){
       name = dsEntry.key;
@@ -370,6 +373,9 @@ class DataSet{
   ///  }
   /// ```
   DataSet fromList(Map<String,Object> map,{bool isListHeader:true, bool isListRecordList:true}){
+    if(map == null){
+      return this;
+    }
     MapEntry dsEntry = map.entries.first;
     if(name == null){
       name = dsEntry.key;
