@@ -79,7 +79,22 @@ class Record{
 
   /// The parent DataSet, which is null if it is an independent record.
   DataSet get dataSet => _dataSet;
-  set dataSet(ds) => _dataSet = ds;
+  set dataSet(ds){
+    _dataSet = ds;
+    _schema.fields.forEach((field) {
+      if(field.isRecord){
+        Record rec = getByName(field.name);
+        if(rec != null){
+          rec.dataSet = ds;
+        }
+      }else if(field.isRecordList){
+        RecordList list = getByName(field.name);
+        if(list != null){
+          list.dataSet = ds;
+        }
+      }
+    });
+  }
 
   Map<String,List<String>> get validated => Map.from(_validated);
 

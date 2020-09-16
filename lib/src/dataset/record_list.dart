@@ -627,7 +627,9 @@ class RecordList implements List<Record>{
     list.dataSet = _dataSet;
     if(isDeep){
       for(Record record in _records){
-        list.add(record.clone());
+        Record newRec = record.clone();
+        newRec.dataSet = _dataSet;
+        list.add(newRec);
       }
     }else{
       list.addAll(this);

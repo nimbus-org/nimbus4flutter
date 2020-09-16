@@ -489,7 +489,9 @@ class DataSet{
   DataSet clone([bool isDeep=false]){
     DataSet ds = cloneEmpty();
     _headers.forEach((key, value){
-      ds._headers[key] = value.clone();
+      Record newRec = value.clone();
+      newRec.dataSet = this;
+      ds._headers[key] = newRec;
     });
     _recordLists.forEach((key, value){
       ds._recordLists[key] = value.clone(isDeep);
