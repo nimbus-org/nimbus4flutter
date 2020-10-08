@@ -478,7 +478,7 @@ class Record{
   /// Copies the value of the specified List to this record.
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
-  Record fromList(List<dynamic> list,[Map<String,Object> recordSchemaMap, Map<String,Object> schemaMap]){
+  Record fromList(List<dynamic> list,[Map<String,dynamic> recordSchemaMap, Map<String,dynamic> schemaMap]){
     if(list == null){
       return this;
     }
@@ -490,34 +490,34 @@ class Record{
           continue;
         }
         if(field.isRecord){
-          value = _dataSet.createNestedRecord(field.schema).fromList(value as List<Object>);
+          value = _dataSet.createNestedRecord(field.schema).fromList(value as List<dynamic>);
         }else if(field.isRecordList){
-          value = _dataSet.createNestedRecordList(field.schema).fromList(value as List<List<Object>>);
+          value = _dataSet.createNestedRecordList(field.schema).fromList(value as List<List<dynamic>>);
         }
         setByIndex(i, value);
       }
     }else{
-      Map<String,Object> nestedRecordSchemaMap = schemaMap == null ? null : schemaMap["nestedRecord"];
-      Map<String,Object> nestedRecordListSchemaMap = schemaMap == null ? null : schemaMap["nestedRecordList"];
+      Map<String,dynamic> nestedRecordSchemaMap = schemaMap == null ? null : schemaMap["nestedRecord"];
+      Map<String,dynamic> nestedRecordListSchemaMap = schemaMap == null ? null : schemaMap["nestedRecordList"];
       for(int i = 0; i < _schema.length; i++){
         FieldSchema field = _schema.fields[i];
         if(field.isView){
           continue;
         }
-        Map<String,Object> fieldSchemaMap = recordSchemaMap[field.name];
+        Map<String,dynamic> fieldSchemaMap = recordSchemaMap[field.name];
         if(fieldSchemaMap == null){
           continue;
         }
         Object value = list[fieldSchemaMap["index"]];
         if(field.isRecord){
           value = _dataSet.createNestedRecord(field.schema).fromList(
-            value as List<Object>,
+            value as List<dynamic>,
             nestedRecordSchemaMap == null ? null : nestedRecordSchemaMap[fieldSchemaMap["schema"]],
             schemaMap
           );
         }else if(field.isRecordList){
           value = _dataSet.createNestedRecordList(field.schema).fromList(
-            value as List<List<Object>>,
+            value as List<List<dynamic>>,
             nestedRecordListSchemaMap == null ? null : nestedRecordListSchemaMap[fieldSchemaMap["schema"]],
             schemaMap
           );

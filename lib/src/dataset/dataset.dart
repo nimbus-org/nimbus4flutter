@@ -372,7 +372,7 @@ class DataSet{
   ///    }
   ///  }
   /// ```
-  DataSet fromList(Map<String,Object> map,{bool isListHeader:true, bool isListRecordList:true}){
+  DataSet fromList(Map<String,dynamic> map,{bool isListHeader:true, bool isListRecordList:true}){
     if(map == null){
       return this;
     }
@@ -380,17 +380,17 @@ class DataSet{
     if(name == null){
       name = dsEntry.key;
     }
-    Map<String,Object> dsMap = dsEntry.value;
-    Map<String,Object> schemaMap = dsMap["schema"];
-    Map<String,Object> headerSchemata = schemaMap == null ? null : schemaMap["header"];
-    Map<String,Object> headers = dsMap["header"];
+    Map<String,dynamic> dsMap = dsEntry.value;
+    Map<String,dynamic> schemaMap = dsMap["schema"];
+    Map<String,dynamic> headerSchemata = schemaMap == null ? null : schemaMap["header"];
+    Map<String,dynamic> headers = dsMap["header"];
     if(headers != null){
       headers.forEach(
         (name, value){
           Record header = _headers[name?.length == 0 ? null : name];
           if(header != null){
             if(isListHeader){
-              Map<String,Object> headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
+              Map<String,dynamic> headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
               header.fromList((value as List).cast<List<dynamic>>(), headerSchema, schemaMap);
             }else{
               header.fromMap(value);
@@ -399,15 +399,15 @@ class DataSet{
         }
       );
     }
-    Map<String,Object> recordListSchemata = schemaMap == null ? null : schemaMap["recordList"];
-    Map<String,Object> recordLists = dsMap["recordList"];
+    Map<String,dynamic> recordListSchemata = schemaMap == null ? null : schemaMap["recordList"];
+    Map<String,dynamic> recordLists = dsMap["recordList"];
     if(recordLists != null){
       recordLists.forEach(
         (name, value){
           RecordList list = _recordLists[name?.length == 0 ? null : name];
           if(list != null){
             if(isListRecordList){
-              Map<String,Object> recordListSchema = recordListSchemata == null ? null : recordListSchemata[name?.length == 0 ? null : name];
+              Map<String,dynamic> recordListSchema = recordListSchemata == null ? null : recordListSchemata[name?.length == 0 ? null : name];
               list.fromList((value as List).cast<List<List<dynamic>>>(), recordListSchema, schemaMap);
             }else{
               list.fromMap(value);
