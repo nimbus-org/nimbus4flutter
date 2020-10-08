@@ -391,7 +391,7 @@ class DataSet{
           if(header != null){
             if(isListHeader){
               Map<String,Object> headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
-              header.fromList((value as List).cast<List<List<Object>>>(), headerSchema, schemaMap);
+              header.fromList((value as List).cast<List<Object>>(), headerSchema, schemaMap);
             }else{
               header.fromMap(value);
             }
