@@ -490,9 +490,9 @@ class Record{
           continue;
         }
         if(field.isRecord){
-          value = _dataSet.createNestedRecord(field.schema).fromList(value as List<dynamic>);
+          value = _dataSet.createNestedRecord(field.schema).fromList(value);
         }else if(field.isRecordList){
-          value = _dataSet.createNestedRecordList(field.schema).fromList(value as List<List<dynamic>>);
+          value = _dataSet.createNestedRecordList(field.schema).fromList(value);
         }
         setByIndex(i, value);
       }
@@ -511,13 +511,13 @@ class Record{
         Object value = list[fieldSchemaMap["index"]];
         if(field.isRecord){
           value = _dataSet.createNestedRecord(field.schema).fromList(
-            value as List<dynamic>,
+            value,
             nestedRecordSchemaMap == null ? null : nestedRecordSchemaMap[fieldSchemaMap["schema"]],
             schemaMap
           );
         }else if(field.isRecordList){
           value = _dataSet.createNestedRecordList(field.schema).fromList(
-            value as List<List<dynamic>>,
+            value,
             nestedRecordListSchemaMap == null ? null : nestedRecordListSchemaMap[fieldSchemaMap["schema"]],
             schemaMap
           );
