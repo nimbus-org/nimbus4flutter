@@ -478,7 +478,7 @@ class Record{
   /// Copies the value of the specified List to this record.
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
-  Record fromList(List<Object> list,[Map<String,Object> recordSchemaMap, Map<String,Object> schemaMap]){
+  Record fromList(List<dynamic> list,[Map<String,Object> recordSchemaMap, Map<String,Object> schemaMap]){
     if(list == null){
       return this;
     }
