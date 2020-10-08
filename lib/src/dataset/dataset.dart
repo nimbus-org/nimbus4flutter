@@ -391,7 +391,7 @@ class DataSet{
           if(header != null){
             if(isListHeader){
               Map<String,dynamic> headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
-              header.fromList((value as List).cast<List<dynamic>>(), headerSchema, schemaMap);
+              header.fromList(value, headerSchema, schemaMap);
             }else{
               header.fromMap(value);
             }
@@ -408,7 +408,7 @@ class DataSet{
           if(list != null){
             if(isListRecordList){
               Map<String,dynamic> recordListSchema = recordListSchemata == null ? null : recordListSchemata[name?.length == 0 ? null : name];
-              list.fromList((value as List).cast<List<List<dynamic>>>(), recordListSchema, schemaMap);
+              list.fromList(value, recordListSchema, schemaMap);
             }else{
               list.fromMap(value);
             }
