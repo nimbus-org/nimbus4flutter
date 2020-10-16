@@ -90,9 +90,6 @@ abstract class TestController{
     Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentScenarioGroup);
     RequestContext context = RequestContext();
     Map<String,dynamic> json = await api.request(null, context);
-    if(json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['CurrentScenarioGroup'] == null ? null : TestScenarioGroup.from(json['CurrentScenarioGroup']);
   }
 
@@ -100,9 +97,6 @@ abstract class TestController{
     Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentScenario);
     RequestContext context = RequestContext();
     Map<String,dynamic> json = await api.request(null, context);
-    if(json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['CurrentScenario'] == null ? null : TestScenario.from(json['CurrentScenario']);
   }
 
@@ -110,9 +104,6 @@ abstract class TestController{
     Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentTestCase);
     RequestContext context = RequestContext();
     Map<String,dynamic> json = await api.request(null, context);
-    if(json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['CurrentTestCase'] == null ? null : TestCase.from(json['CurrentTestCase']);
   }
 
@@ -120,9 +111,6 @@ abstract class TestController{
     Api<void,Map<String,dynamic>> api = _getApi(ApiName.getTestPhase);
     RequestContext context = RequestContext();
     Map<String,dynamic> json = await api.request(null, context);
-    if(json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['phase'];
   }
 
@@ -132,19 +120,13 @@ abstract class TestController{
     Map<String,dynamic> input = api.getInput(context);
     input['userId'] = userId;
     input['scenarioGroupId'] = scenarioGroupId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> endScenarioGroup() async{
     Api<void,Map<String,dynamic>> api = _getApi(ApiName.endScenarioGroup);
     RequestContext context = RequestContext();
-    Map<String,dynamic> json = await api.request(null, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(null, context);
   }
 
   Future<void> startScenario(String userId, String scenarioId) async{
@@ -153,10 +135,7 @@ abstract class TestController{
     Map<String,dynamic> input = api.getInput(context);
     input['userId'] = userId;
     input['scenarioId'] = scenarioId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> cancelScenario(String scenarioId) async{
@@ -164,10 +143,7 @@ abstract class TestController{
     RequestContext context = RequestContext();
     Map<String,dynamic> input = api.getInput(context);
     input['scenarioId'] = scenarioId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> endScenario(String scenarioId) async{
@@ -175,10 +151,7 @@ abstract class TestController{
     RequestContext context = RequestContext();
     Map<String,dynamic> input = api.getInput(context);
     input['scenarioId'] = scenarioId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> startTestCase(String userId, String scenarioId, String testcaseId) async{
@@ -188,10 +161,7 @@ abstract class TestController{
     input['userId'] = userId;
     input['scenarioId'] = scenarioId;
     input['testcaseId'] = testcaseId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> cancelTestCase(String scenarioId, String testcaseId) async{
@@ -200,10 +170,7 @@ abstract class TestController{
     Map<String,dynamic> input = api.getInput(context);
     input['scenarioId'] = scenarioId;
     input['testcaseId'] = testcaseId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<void> endTestCase(String scenarioId, String testcaseId) async{
@@ -212,10 +179,7 @@ abstract class TestController{
     Map<String,dynamic> input = api.getInput(context);
     input['scenarioId'] = scenarioId;
     input['testcaseId'] = testcaseId;
-    Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
+    await api.request(input, context);
   }
 
   Future<TestScenarioGroupStatus> getTestScenarioGroupStatus(String scenarioGroupId) async{
@@ -224,9 +188,6 @@ abstract class TestController{
     Map<String,dynamic> input = api.getInput(context);
     input['scenarioGroupId'] = scenarioGroupId;
     Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['TestScenarioGroupStatus'] == null ? null : TestScenarioGroupStatus.from(json['TestScenarioGroupStatus']);
   }
 
@@ -237,9 +198,6 @@ abstract class TestController{
     input['scenarioGroupId'] = scenarioGroupId;
     input['scenarioId'] = scenarioId;
     Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['TestScenarioStatus'] == null ? null : TestScenarioStatus.from(json['TestScenarioStatus']);
   }
 
@@ -251,9 +209,6 @@ abstract class TestController{
     input['scenarioId'] = scenarioId;
     input['testcaseId'] = testcaseId;
     Map<String,dynamic> json = await api.request(input, context);
-    if(json != null && json['exception'] != null){
-      throw Exception(json['exception']['message']);
-    }
     return json['TestCaseStatus'] == null ? null : TestCaseStatus.from(json['TestCaseStatus']);
   }
 }
