@@ -58,3 +58,4 @@ export 'src/test/test_controller.dart';
 export 'src/test/test_scenario_group.dart';
 export 'src/test/test_scenario.dart';
 export 'src/test/test_case.dart';
+export 'src/test_http/test_controller.dart';
