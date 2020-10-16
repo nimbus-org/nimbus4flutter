@@ -54,3 +54,7 @@ export 'src/api_io/api_server.dart';
 export 'src/api_http/api.dart';
 export 'src/api_http/api_server.dart';
 export 'src/settings/settings.dart';
+export 'src/test/test_controller.dart';
+export 'src/test/test_scenario_group.dart';
+export 'src/test/test_scenario.dart';
+export 'src/test/test_case.dart';
