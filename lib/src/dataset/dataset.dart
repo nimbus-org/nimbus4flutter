@@ -490,11 +490,10 @@ class DataSet{
     DataSet ds = cloneEmpty();
     _headers.forEach((key, value){
       Record newRec = value.clone();
-      newRec.dataSet = this;
-      ds._headers[key] = newRec;
+      ds.setHeader(newRec, key);
     });
     _recordLists.forEach((key, value){
-      ds._recordLists[key] = value.clone(isDeep);
+      ds.setRecordList(value.clone(isDeep), key);
     });
     _nestedRecordSchemata.forEach((key, value){
       ds._nestedRecordSchemata[key] = value;
