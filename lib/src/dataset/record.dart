@@ -126,7 +126,11 @@ class Record{
     Object value = fs.isView ? fs.viewValue(_dataSet, this) : _values[name];
     T ret;
     if(value == null){
-      ret = null;
+      if(fs.type != T && isFormat){
+        ret = fs.formatValue(value);
+      }else{
+        ret = null;
+      }
     }else{
       if(!isFormat && value is T){
         ret = value;
