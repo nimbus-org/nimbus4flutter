@@ -258,6 +258,8 @@ class FieldSchema<T>{
               || inputValue.toLowerCase() == 'on'
               || inputValue == '1');
           }
+        }else if(inputValue is int && _type == double){
+          return inputValue.toDouble();
         }
         return inputValue;
       }
