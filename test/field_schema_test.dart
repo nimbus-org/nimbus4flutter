@@ -14,13 +14,13 @@ void main() {
     test('constructor converter', () {
       final fieldSchema = FieldSchema<List<int>>(
         'fieldName1',
-        inputConverter: (input)=>Utf8Encoder().convert(input),
-        outputConverter: (input)=>Utf8Decoder().convert(input)
+        inputConverter: (ds, rec, input)=>Utf8Encoder().convert(input),
+        outputConverter: (ds, rec, input)=>Utf8Decoder().convert(input)
       );
       expect(fieldSchema.name, 'fieldName1');
       expect(fieldSchema.instanceof(List<int>()), true);
-      expect(fieldSchema.parseValue("hoge"), Utf8Encoder().convert("hoge"));
-      expect(fieldSchema.formatValue(Utf8Encoder().convert("hoge")), "hoge");
+      expect(fieldSchema.parseValue(null, null, "hoge"), Utf8Encoder().convert("hoge"));
+      expect(fieldSchema.formatValue(null, null, Utf8Encoder().convert("hoge")), "hoge");
     });
     test('constructor record', () {
       final fieldSchema = FieldSchema.record('fieldName1','nestedRecordName');

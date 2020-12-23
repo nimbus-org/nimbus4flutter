@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 void main() {
-  FieldConverter<dynamic,DateTime> stringToDate = (input)=>DateFormat('yyyy/MM/dd').parse(input);
-  FieldConverter<DateTime,dynamic> dateToString = (input)=>DateFormat('yyyy/MM/dd').format(input);
+  FieldConverter<dynamic,DateTime> stringToDate = (ds, rec, input)=>DateFormat('yyyy/MM/dd').parse(input);
+  FieldConverter<DateTime,dynamic> dateToString = (ds, rec, input)=>DateFormat('yyyy/MM/dd').format(input);
   group('convert map test', () {
     test('convert map test', () {
      DataSet ds = DataSet("User");
@@ -101,11 +101,11 @@ void main() {
       List<Map<String,Object>> career = recordLists["career"];
       expect(career.length, 2);
       expect(career[0]["title"], "career1");
-      expect(career[0]["from"], stringToDate("2020/01/01"));
-      expect(career[0]["to"], stringToDate("2020/01/30"));
+      expect(career[0]["from"], stringToDate(null, null, "2020/01/01"));
+      expect(career[0]["to"], stringToDate(null, null, "2020/01/30"));
       expect(career[0]["detail"], ["detail1","detail2"]);
       expect(career[1]["title"], "career2");
-      expect(career[1]["from"], stringToDate("2020/02/01"));
+      expect(career[1]["from"], stringToDate(null, null, "2020/02/01"));
       expect(career[1]["to"], now);
       expect(career[1]["detail"], ["detail1","detail2"]);
       ds.clear();
@@ -127,11 +127,11 @@ void main() {
       expect(emergencyContactList[1]["tel"], "0123456789");
       expect(ds.getRecordList("career").length, 2);
       expect(ds.getRecordList("career")[0]["title"], "career1");
-      expect(ds.getRecordList("career")[0]["from"], stringToDate("2020/01/01"));
-      expect(ds.getRecordList("career")[0]["to"], stringToDate("2020/01/30"));
+      expect(ds.getRecordList("career")[0]["from"], stringToDate(null, null, "2020/01/01"));
+      expect(ds.getRecordList("career")[0]["to"], stringToDate(null, null, "2020/01/30"));
       expect(ds.getRecordList("career")[0]["detail"], ["detail1","detail2"]);
       expect(ds.getRecordList("career")[1]["title"], "career2");
-      expect(ds.getRecordList("career")[1]["from"], stringToDate("2020/02/01"));
+      expect(ds.getRecordList("career")[1]["from"], stringToDate(null, null, "2020/02/01"));
       expect(ds.getRecordList("career")[1]["to"], now);
       expect(ds.getRecordList("career")[1]["detail"], ["detail1","detail2"]);
     });
@@ -206,7 +206,7 @@ void main() {
       expect(career[0]["detail"], ["detail1","detail2"]);
       expect(career[1]["title"], "career2");
       expect(career[1]["from"], "2020/02/01");
-      expect(career[1]["to"], dateToString(now));
+      expect(career[1]["to"], dateToString(null, null, now));
       expect(career[1]["detail"], ["detail1","detail2"]);
       ds.clear();
       expect(ds.getHeader()["name"], null);
@@ -219,12 +219,12 @@ void main() {
       expect(ds.getHeader()["hasSpouse"], false);
       expect(ds.getRecordList("career").length, 2);
       expect(ds.getRecordList("career")[0]["title"], "career1");
-      expect(ds.getRecordList("career")[0]["from"], stringToDate("2020/01/01"));
-      expect(ds.getRecordList("career")[0]["to"], stringToDate("2020/01/30"));
+      expect(ds.getRecordList("career")[0]["from"], stringToDate(null, null, "2020/01/01"));
+      expect(ds.getRecordList("career")[0]["to"], stringToDate(null, null, "2020/01/30"));
       expect(ds.getRecordList("career")[0]["detail"], ["detail1","detail2"]);
       expect(ds.getRecordList("career")[1]["title"], "career2");
-      expect(ds.getRecordList("career")[1]["from"], stringToDate("2020/02/01"));
-      expect(ds.getRecordList("career")[1]["to"], stringToDate(dateToString(now)));
+      expect(ds.getRecordList("career")[1]["from"], stringToDate(null, null, "2020/02/01"));
+      expect(ds.getRecordList("career")[1]["to"], stringToDate(null, null, dateToString(null, null, now)));
       expect(ds.getRecordList("career")[1]["detail"], ["detail1","detail2"]);
     });
     test('convert map with schema test', () {
@@ -375,12 +375,12 @@ void main() {
       expect(ds.getHeader()["hasSpouse"], false);
       expect(ds.getRecordList("career").length, 2);
       expect(ds.getRecordList("career")[0]["title"], "career1");
-      expect(ds.getRecordList("career")[0]["from"], stringToDate("2020/01/01"));
-      expect(ds.getRecordList("career")[0]["to"], stringToDate("2020/01/30"));
+      expect(ds.getRecordList("career")[0]["from"], stringToDate(null, null, "2020/01/01"));
+      expect(ds.getRecordList("career")[0]["to"], stringToDate(null, null, "2020/01/30"));
       expect(ds.getRecordList("career")[0]["detail"], ["detail1","detail2"]);
       expect(ds.getRecordList("career")[1]["title"], "career2");
-      expect(ds.getRecordList("career")[1]["from"], stringToDate("2020/02/01"));
-      expect(ds.getRecordList("career")[1]["to"], stringToDate(dateToString(now)));
+      expect(ds.getRecordList("career")[1]["from"], stringToDate(null, null, "2020/02/01"));
+      expect(ds.getRecordList("career")[1]["to"], stringToDate(null, null, dateToString(null, null, now)));
       expect(ds.getRecordList("career")[1]["detail"], ["detail1","detail2"]);
     });
   });
@@ -451,11 +451,11 @@ void main() {
       List<List<Object>> career = recordLists["career"];
       expect(career.length, 2);
       expect(career[0][0], "career1");
-      expect(career[0][1], stringToDate("2020/01/01"));
-      expect(career[0][2], stringToDate("2020/01/30"));
+      expect(career[0][1], stringToDate(null, null, "2020/01/01"));
+      expect(career[0][2], stringToDate(null, null, "2020/01/30"));
       expect(career[0][3], ["detail1","detail2"]);
       expect(career[1][0], "career2");
-      expect(career[1][1], stringToDate("2020/02/01"));
+      expect(career[1][1], stringToDate(null, null, "2020/02/01"));
       expect(career[1][2], now);
       expect(career[1][3], ["detail1","detail2"]);
       ds.clear();
@@ -469,11 +469,11 @@ void main() {
       expect(ds.getHeader()["hasSpouse"], false);
       expect(ds.getRecordList("career").length, 2);
       expect(ds.getRecordList("career")[0]["title"], "career1");
-      expect(ds.getRecordList("career")[0]["from"], stringToDate("2020/01/01"));
-      expect(ds.getRecordList("career")[0]["to"], stringToDate("2020/01/30"));
+      expect(ds.getRecordList("career")[0]["from"], stringToDate(null, null, "2020/01/01"));
+      expect(ds.getRecordList("career")[0]["to"], stringToDate(null, null, "2020/01/30"));
       expect(ds.getRecordList("career")[0]["detail"], ["detail1","detail2"]);
       expect(ds.getRecordList("career")[1]["title"], "career2");
-      expect(ds.getRecordList("career")[1]["from"], stringToDate("2020/02/01"));
+      expect(ds.getRecordList("career")[1]["from"], stringToDate(null, null, "2020/02/01"));
       expect(ds.getRecordList("career")[1]["to"], now);
       expect(ds.getRecordList("career")[1]["detail"], ["detail1","detail2"]);
     });
@@ -569,7 +569,7 @@ void main() {
       );
       expect(ds.getHeader()["careerCount"], 2);
       expect((ds.getHeader()["careerTerm"] as Record).getByName<String>("from"), "2020/01/01");
-      expect((ds.getHeader()["careerTerm"] as Record).getByName<String>("to"), dateToString(now));
+      expect((ds.getHeader()["careerTerm"] as Record).getByName<String>("to"), dateToString(null, null, now));
     });
   });
 }

@@ -35,13 +35,13 @@ import 'dart:core';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 /// This function is used for input conversion and output conversion of a field.
-typedef FieldConverter<I,O> = O Function(I input);
+typedef FieldConverter<I,O> = O Function(DataSet ds, Record rec, I input);
 
 /// This function is used for the view of a field.
 typedef FieldViewer<O> = O Function(DataSet ds, Record rec, O defaultValue);
 
 /// This function is used for input conversion and output conversion of a field.
-typedef FieldValidator<I> = List<String> Function(Record rec,I input);
+typedef FieldValidator<I> = List<String> Function(DataSet ds, Record rec, I input);
 
 /// Define the schema for the fields in [Record] and [RecordList].
 /// 
@@ -241,7 +241,7 @@ class FieldSchema<T>{
   bool instanceof(Object value) => value == null ? true : value is T;
 
   /// Input conversion of the specified object to match the type of this field.
-  Object parseValue(Object inputValue){
+  Object parseValue(DataSet ds,  Record rec, Object inputValue){
     if(_inputConverter == null){
       if(inputValue == null || instanceof(inputValue)){
         return inputValue;
@@ -264,13 +264,13 @@ class FieldSchema<T>{
         return inputValue;
       }
     }else{
-      return _inputConverter(inputValue);
+      return _inputConverter(ds, rec, inputValue);
     }
   }
 
 
   /// Converts the specified object suitable for the type of this field to an output that matches the specified generic type.
-  F formatValue<F>(T value){
+  F formatValue<F>(DataSet ds,  Record rec, T value){
      if(_outputConverter == null){
        if(value == null || value is F){
         return value as F;
@@ -291,12 +291,12 @@ class FieldSchema<T>{
         return value as F;
       }
     }else{
-       return _outputConverter(value);
+       return _outputConverter(ds, rec, value);
      }
   }
 
-  List<String> validate(Record rec, T value){
-    return _fieldValidator == null ? null : _fieldValidator(rec, value);
+  List<String> validate(DataSet ds,  Record rec, T value){
+    return _fieldValidator == null ? null : _fieldValidator(ds, rec, value);
   }
   
   /// If this field is a view, it will return a value using the specified [DataSet] and [Record].

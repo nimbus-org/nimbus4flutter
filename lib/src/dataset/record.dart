@@ -127,7 +127,7 @@ class Record{
     T ret;
     if(value == null){
       if(fs.type != T && isFormat){
-        ret = fs.formatValue(value);
+        ret = fs.formatValue(_dataSet, this, value);
       }else{
         ret = null;
       }
@@ -135,7 +135,7 @@ class Record{
       if(!isFormat && value is T){
         ret = value;
       }else{
-        value = fs.formatValue(value);
+        value = fs.formatValue(_dataSet, this, value);
         if(value is T){
           ret = value;
         }else{
@@ -204,7 +204,7 @@ class Record{
     }
     if(value != null){
       if(!fs.instanceof(value)){
-        value = fs.parseValue(value);
+        value = fs.parseValue(_dataSet, this, value);
         if(!fs.instanceof(value)){
           throw Exception("The type doesn't match. name=$name, type=${value.runtimeType}, schema=$_schema");
         }
@@ -239,7 +239,7 @@ class Record{
     if(!_validated.containsKey(name)){
       return null;
     }
-    List<String> result = fs.validate(this, getByName(name));
+    List<String> result = fs.validate(_dataSet, this, getByName(name));
     _validated[name] = result == null ? List<String>() : result;
     return result;
   }
