@@ -30,15 +30,15 @@
  * policies, either expressed or implied, of the Nimbus Project.
  */
 
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
-typedef ApiServerIOClientBuilder = void Function(HttpClient client);
+typedef ApiServerIOClientBuilder = void Function(io.HttpClient client);
 
-typedef ApiServerIORequestBuilder = void Function(HttpClientRequest request, HttpMethod method, Object input);
+typedef ApiServerIORequestBuilder = void Function(io.HttpClientRequest request, HttpMethod method, Object input);
 
-typedef ApiServerIOResponseParser = Future<void> Function(HttpClientResponse response, HttpMethod method, Object output);
+typedef ApiServerIOResponseParser = Future<void> Function(io.HttpClientResponse response, HttpMethod method, Object output);
 
 /// It contains information about the server with the API and its processing.
 /// 
@@ -80,7 +80,7 @@ class ApiServerIO extends ApiServer{
   final ApiServerIORequestBuilder _requestBuilder;
   final ApiServerIOResponseParser _responseParser;
 
-  final HttpClient _client = HttpClient();
+  final io.HttpClient _client = io.HttpClient();
 
   /// Construct ApiServer
   /// 
@@ -111,7 +111,7 @@ class ApiServerIO extends ApiServer{
   }
 
   /// HttpClient to communicate with the server.
-  HttpClient get client => _client;
+  io.HttpClient get client => _client;
 
   /// The process of building HttpClientRequest, an HTTP request to the server.
   ApiServerIORequestBuilder get requestBuilder => _requestBuilder;

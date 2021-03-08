@@ -31,6 +31,8 @@
  */
 
 import 'package:http/http.dart';
+import 'dart:io';
+import 'package:cookie_jar/cookie_jar.dart';
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
@@ -78,7 +80,7 @@ class ApiServerHttp extends ApiServer{
   final ApiServerHttpRequestBuilder _requestBuilder;
   final ApiServerHttpResponseParser _responseParser;
 
-  final Client _client = Client();
+  final HttpClient _client = HttpClient();
 
   /// Construct ApiServer
   /// 
@@ -109,7 +111,7 @@ class ApiServerHttp extends ApiServer{
   }
 
   /// HttpClient to communicate with the server.
-  Client get client => _client;
+  HttpClient get client => _client;
 
   /// The process of building HttpClientRequest, an HTTP request to the server.
   ApiServerHttpRequestBuilder get requestBuilder => _requestBuilder;
@@ -121,4 +123,59 @@ class ApiServerHttp extends ApiServer{
   @override
   void close({bool force: false}) => _client.close();
 
+}
+
+class HttpClient extends BaseClient {
+
+  final Client _inner = Client();
+  final CookieJar cookieJar = CookieJar();
+  Duration requestTimeout;
+
+  @override
+  Future<StreamedResponse> send(BaseRequest request) async {
+
+    final cookies = cookieJar.loadForRequest(request.url);
+    _removeExpiredCookies(cookies);
+
+    String cookie = _getCookies(cookies);
+    if (cookie.isNotEmpty) {
+      request.headers[HttpHeaders.cookieHeader] = cookie;
+    }
+
+    final response = await (requestTimeout == null ? _inner.send(request) : _inner.send(request).timeout(requestTimeout));
+
+    if (response != null && response.headers != null) {
+      final cookieHeader = response.headers[HttpHeaders.setCookieHeader];
+      _saveCookies(response.request.url, cookieHeader);
+    }
+
+    return response;
+  }
+
+  void _removeExpiredCookies(List<Cookie> cookies) {
+    cookies.removeWhere((cookie) {
+      if (cookie.expires != null) {
+        return cookie.expires.isBefore(DateTime.now());
+      }
+      return false;
+    });
+  }
+
+  String _getCookies(List<Cookie> cookies) {
+    return cookies.map((cookie) => "${cookie.name}=${cookie.value}").join('; ');
+  }
+
+  void _saveCookies(Uri uri, String cookieHeader) {
+    if (cookieHeader == null || cookieHeader.isEmpty) {
+      return;
+    }
+    final cookies = cookieHeader.split(",");
+    if (cookies.isEmpty) {
+      return;
+    }
+    cookieJar.saveFromResponse(
+      uri,
+      cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList(),
+    );
+  }
 }
