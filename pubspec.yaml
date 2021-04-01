@@ -1,8 +1,11 @@
 name: nimbus4flutter
 description: A new Flutter package project.
 version: 0.0.1
-author: M.Takata
-homepage: https://github.com/m-takata
+
+authors:
+- nimbus.org.project <nimbus.org.project@gmail.com>
+
+homepage: https://github.com/nimbus-org/nimbus4flutter
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
