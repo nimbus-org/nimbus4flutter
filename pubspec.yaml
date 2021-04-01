@@ -1,9 +1,6 @@
 name: nimbus4flutter
-description: A new Flutter package project.
+description: This is a library for developing Flutter applications that communicate with a web server built using [Project Nimbus](https://github.com/nimbus-org/nimbus).
 version: 0.0.1
-
-authors:
-- nimbus.org.project <nimbus.org.project@gmail.com>
 
 homepage: https://github.com/nimbus-org/nimbus4flutter
 
@@ -14,15 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
   
-  meta:
+  meta: ^1.3.0
   
-  shared_preferences:
+  shared_preferences: ^0.5.8
 
-  http:
+  http: ^0.12.2
 
-  cookie_jar:
+  cookie_jar: ^2.0.0
 
 dev_dependencies:
+
   flutter_test:
     sdk: flutter
   
