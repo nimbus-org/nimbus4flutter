@@ -1,3 +1,5 @@
-## [0.0.1] - TODO: Add release date.
+## [0.0.1-nullsafety.0]
+ * null safty supported prerelease.
 
-* TODO: Describe initial release.
+## [0.0.1]
+ * initial release.

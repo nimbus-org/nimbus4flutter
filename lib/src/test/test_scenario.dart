@@ -1,44 +1,44 @@
 
 class TestScenario{
   
-  final String _scenarioGroupId;
-  final String _scenarioId;
-  final TestScenarioStatus _status;
+  final String? _scenarioGroupId;
+  final String? _scenarioId;
+  final TestScenarioStatus? _status;
 
-  TestScenario(String scenarioGroupId, String scenarioId, TestScenarioStatus status)
+  TestScenario(String? scenarioGroupId, String? scenarioId, TestScenarioStatus? status)
    : _scenarioGroupId = scenarioGroupId,
    _scenarioId = scenarioId,
    _status = status;
   
-  TestScenario.from(Map<String,dynamic> json) : this(
+  TestScenario.from(Map<String,dynamic?> json) : this(
     json['scenarioGroupId'],
     json['scenarioId'],
     json['status'] == null ? null : TestScenarioStatus.from(json['status'])
   );
 
-  String get scenarioGroupId => _scenarioGroupId;
-  String get scenarioId => _scenarioId;
-  TestScenarioStatus get status => _status;
+  String? get scenarioGroupId => _scenarioGroupId;
+  String? get scenarioId => _scenarioId;
+  TestScenarioStatus? get status => _status;
 }
 
 
 class TestScenarioStatus{
-  final String _currentActionId;
-  final Map<String,bool> _actionResultMap;
-  final Map<String,bool> _actionEndMap;
-  final TestScenarioState _state;
-  final String _stateString;
-  final DateTime _endTime;
-  final Exception _exception;
+  final String? _currentActionId;
+  final Map<String,bool>? _actionResultMap;
+  final Map<String,bool>? _actionEndMap;
+  final TestScenarioState? _state;
+  final String? _stateString;
+  final DateTime? _endTime;
+  final Exception? _exception;
 
   TestScenarioStatus(
-    String currentActionId,
-    Map<String,bool> actionResultMap,
-    Map<String,bool> actionEndMap,
-    TestScenarioState state,
-    String stateString,
-    DateTime endTime,
-    Exception exception
+    String? currentActionId,
+    Map<String,bool>? actionResultMap,
+    Map<String,bool>? actionEndMap,
+    TestScenarioState? state,
+    String? stateString,
+    DateTime? endTime,
+    Exception? exception
   ) : _currentActionId = currentActionId,
    _actionResultMap = actionResultMap,
    _actionEndMap = actionEndMap,
@@ -58,15 +58,15 @@ class TestScenarioStatus{
     json['throwable'] == null ? null : Exception(json['throwable']['message'])
   );
 
-  String get currentActionId => _currentActionId;
-  Map<String,bool> get actionResultMap => _actionResultMap;
-  bool getActionResult(String actionId) => _actionResultMap == null ? null : _actionResultMap[actionId];
-  Map<String,bool> get actionEndMap => _actionEndMap;
-  bool isActionEnd(String actionId) => _actionEndMap == null ? null : _actionEndMap[actionId];
-  TestScenarioState get state => _state;
-  String get stateString => _stateString;
-  DateTime get endTime => _endTime;
-  Exception get exception => _exception;
+  String? get currentActionId => _currentActionId;
+  Map<String,bool>? get actionResultMap => _actionResultMap;
+  bool? getActionResult(String actionId) => _actionResultMap == null ? null : _actionResultMap![actionId];
+  Map<String,bool>? get actionEndMap => _actionEndMap;
+  bool? isActionEnd(String actionId) => _actionEndMap == null ? null : _actionEndMap![actionId];
+  TestScenarioState? get state => _state;
+  String? get stateString => _stateString;
+  DateTime? get endTime => _endTime;
+  Exception? get exception => _exception;
 
   static TestScenarioState _toTestScenarioGroupState(int value){
     switch(value){

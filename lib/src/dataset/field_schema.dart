@@ -35,13 +35,13 @@ import 'dart:core';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 /// This function is used for input conversion and output conversion of a field.
-typedef FieldConverter<I,O> = O Function(DataSet ds, Record rec, I input);
+typedef FieldConverter<I,O> = O? Function(DataSet? ds, Record rec, I? input);
 
 /// This function is used for the view of a field.
-typedef FieldViewer<O> = O Function(DataSet ds, Record rec, O defaultValue);
+typedef FieldViewer<O> = O? Function(DataSet? ds, Record rec, O? defaultValue);
 
 /// This function is used for input conversion and output conversion of a field.
-typedef FieldValidator<I> = List<String> Function(DataSet ds, Record rec, I input);
+typedef FieldValidator<I> = List<String>? Function(DataSet? ds, Record rec, I? input);
 
 /// Define the schema for the fields in [Record] and [RecordList].
 /// 
@@ -77,14 +77,14 @@ typedef FieldValidator<I> = List<String> Function(DataSet ds, Record rec, I inpu
 class FieldSchema<T>{
   final String _name;
   final Type _type;
-  final Object _defaultValue;
-  final FieldConverter<dynamic,T> _inputConverter;
-  final FieldConverter<T,dynamic> _outputConverter;
-  final FieldValidator<T> _fieldValidator;
-  final FieldViewer<T> _fieldViewer;
+  final Object? _defaultValue;
+  final FieldConverter<dynamic,T>? _inputConverter;
+  final FieldConverter<T,dynamic>? _outputConverter;
+  final FieldValidator<T>? _fieldValidator;
+  final FieldViewer<T>? _fieldViewer;
   final bool _isPrimary;
   final bool _isOutput;
-  final String _schema;
+  final String? _schema;
   final bool _isRecord;
   final bool _isRecordList;
 
@@ -99,10 +99,10 @@ class FieldSchema<T>{
   FieldSchema(
     String name,
     {
-      T defaultValue,
-      FieldConverter<dynamic,T> inputConverter,
-      FieldConverter<T,dynamic> outputConverter,
-      FieldValidator<T> fieldValidator,
+      T? defaultValue,
+      FieldConverter<dynamic,T>? inputConverter,
+      FieldConverter<T,dynamic>? outputConverter,
+      FieldValidator<T>? fieldValidator,
       bool isPrimary = false,
       bool isOutput = true
     }
@@ -184,8 +184,8 @@ class FieldSchema<T>{
     String name,
     FieldViewer<T> fieldViewer,
     {
-      T defaultValue,
-      FieldConverter<T,dynamic> outputConverter,
+      T? defaultValue,
+      FieldConverter<T,dynamic>? outputConverter,
       bool isOutput = true
     }
   ) : _name = name,
@@ -208,7 +208,7 @@ class FieldSchema<T>{
   Type get type => _type;
 
   /// The default value for the field.
-  Object get defaultValue => _defaultValue;
+  Object? get defaultValue => _defaultValue;
 
   /// The flag whether the field is a component of the primary key or not.
   bool get isPrimary => _isPrimary;
@@ -226,7 +226,7 @@ class FieldSchema<T>{
   bool get isRecordList => _isRecordList;
 
   /// The schema name when the field is a nested [Record] or [RecordList].
-  String get schema => _schema;
+  String? get schema => _schema;
 
   /// The flag whether or not an input conversion is present in the field.
   bool get hasInputConverter => _inputConverter != null; 
@@ -238,10 +238,10 @@ class FieldSchema<T>{
   bool get hasValidator => _fieldValidator != null; 
   
   /// Determines if the specified object is assignable to the type of this field.
-  bool instanceof(Object value) => value == null ? true : value is T;
+  bool instanceof(Object? value) => value == null ? true : value is T;
 
   /// Input conversion of the specified object to match the type of this field.
-  Object parseValue(DataSet ds,  Record rec, Object inputValue){
+  Object? parseValue(DataSet? ds,  Record rec, Object? inputValue){
     if(_inputConverter == null){
       if(inputValue == null || instanceof(inputValue)){
         return inputValue;
@@ -264,13 +264,13 @@ class FieldSchema<T>{
         return inputValue;
       }
     }else{
-      return _inputConverter(ds, rec, inputValue);
+      return _inputConverter!(ds, rec, inputValue);
     }
   }
 
 
   /// Converts the specified object suitable for the type of this field to an output that matches the specified generic type.
-  F formatValue<F>(DataSet ds,  Record rec, T value){
+  F? formatValue<F>(DataSet? ds,  Record rec, T? value){
      if(_outputConverter == null){
        if(value == null || value is F){
         return value as F;
@@ -291,17 +291,18 @@ class FieldSchema<T>{
         return value as F;
       }
     }else{
-       return _outputConverter(ds, rec, value);
-     }
+       return _outputConverter!(ds, rec, value);
+    }
   }
 
-  List<String> validate(DataSet ds,  Record rec, T value){
-    return _fieldValidator == null ? null : _fieldValidator(ds, rec, value);
+  List<String>? validate(DataSet? ds,  Record rec, T? value){
+    return _fieldValidator == null ? null : _fieldValidator!(ds, rec, value);
   }
   
   /// If this field is a view, it will return a value using the specified [DataSet] and [Record].
-  T viewValue(DataSet ds, Record record){
-    return _fieldViewer == null ? defaultValue : _fieldViewer(ds, record, defaultValue);
+  T? viewValue(DataSet? ds, Record record){
+    Object? ret = _fieldViewer == null ? defaultValue : _fieldViewer!(ds, record, defaultValue == null ? null : (defaultValue as T));
+    return ret == null ? null : ret as T;
   }
   
   @override

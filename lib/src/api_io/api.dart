@@ -35,10 +35,10 @@ import 'dart:async';
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 /// Function to process of building HttpClientRequest, an HTTP request to the server.
-typedef ApiIORequestBuilder<I> = void Function(HttpClientRequest request, I input, Function(HttpClientRequest request, I input) serverBuilder);
+typedef ApiIORequestBuilder<I> = void Function(HttpClientRequest request, I? input, Function(HttpClientRequest request, I? input) serverBuilder);
 
 /// Function to process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
-typedef ApiIOResponseParser<O> = Future<void> Function(HttpClientResponse response, O output, Function(HttpClientResponse response, O output) serverParser);
+typedef ApiIOResponseParser<O> = Future<void> Function(HttpClientResponse response, O? output, Function(HttpClientResponse response, O? output) serverParser);
 
 /// A single API.
 /// 
@@ -84,11 +84,11 @@ class ApiIO<I,O> extends Api<I,O>{
   final String _serverName;
   final HttpMethod _method;
   final String _path;
-  final ApiInOutCreator<I> _inputCreator;
-  final ApiInOutCreator<O> _outputCreator;
-  final UriBuilder<I> _uriBuilder;
-  final ApiIORequestBuilder<I> _requestBuilder;
-  final ApiIOResponseParser<O> _responseParser;
+  final ApiInOutCreator<I>? _inputCreator;
+  final ApiInOutCreator<O>? _outputCreator;
+  final UriBuilder<I>? _uriBuilder;
+  final ApiIORequestBuilder<I>? _requestBuilder;
+  final ApiIOResponseParser<O>? _responseParser;
 
   /// Construct API.
   ///
@@ -103,15 +103,15 @@ class ApiIO<I,O> extends Api<I,O>{
   /// In [responseParser], specify the process of parsing from HttpClientResponse, an HTTP response from the server, to the output DTO.
   ApiIO(
     {
-      @required String name,
-      @required String  serverName,
-      @required HttpMethod method,
-      @required String path,
-      ApiInOutCreator<I> inputCreator,
-      ApiInOutCreator<O> outputCreator,
-      UriBuilder<I> uriBuilder,
-      ApiIORequestBuilder<I> requestBuilder,
-      ApiIOResponseParser<O> responseParser
+      required String name,
+      required String  serverName,
+      required HttpMethod method,
+      required String path,
+      ApiInOutCreator<I>? inputCreator,
+      ApiInOutCreator<O>? outputCreator,
+      UriBuilder<I>? uriBuilder,
+      ApiIORequestBuilder<I>? requestBuilder,
+      ApiIOResponseParser<O>? responseParser
     }
   ) : _serverName = serverName,
     _method = method,
@@ -124,18 +124,18 @@ class ApiIO<I,O> extends Api<I,O>{
     super(name);
   
   @override
-  I getInput(RequestContext context) => _inputCreator == null ? null : _inputCreator(context);
+  I? getInput(RequestContext context) => _inputCreator == null ? null : _inputCreator!(context);
 
   @override
-  Future<O> request(I input, RequestContext context){
-    context?.setInput(name, context);
+  Future<O?> request(I? input, RequestContext context){
+    context.setInput(name, context);
     Future<HttpClientRequest> req;
     ApiServerIO server = ApiRegistory.getApiServer(_serverName) as ApiServerIO;
     Uri uri;
     if(_uriBuilder != null){
-      uri = _uriBuilder(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input));
+      uri = _uriBuilder!(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input));
     }else if(server.uriBuilder != null){
-      uri = server.uriBuilder(server.scheme, server.host, server.port, _path, _method, input);
+      uri = server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input);
     }else{
       uri = Uri(
         host: server.host,
@@ -166,35 +166,35 @@ class ApiIO<I,O> extends Api<I,O>{
     }
     Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
       if(_requestBuilder != null){
-        _requestBuilder(request, input, (request, input) => server.requestBuilder ?? server.requestBuilder(request, _method, input));
+        _requestBuilder!(request, input, (request, input) => server.requestBuilder ?? server.requestBuilder!(request, _method, input));
       }else if(server.requestBuilder != null){
-        server.requestBuilder(request, _method, input);
+        server.requestBuilder!(request, _method, input);
       }
       return request.close();
     }).catchError(
       (e) => context.exception = e
     ).whenComplete(() {if(context.exception != null) throw context.exception;});
     
-    O output = _outputCreator == null ? null : _outputCreator(context);
+    O? output = _outputCreator == null ? null : _outputCreator!(context);
     return resp.then((HttpClientResponse response) async{
       try{
         if(_responseParser != null){
-          await _responseParser(
+          await _responseParser!(
             response,
             output,
             (response, output) {
-              return server.responseParser ?? server.responseParser(response, _method, output)
+              return server.responseParser ?? server.responseParser!(response, _method, output)
                 .catchError((e) => (e) => context.exception = e);
             }
           );
           
         }else if(server.responseParser != null){
-          await server.responseParser(response, _method, output);
+          await server.responseParser!(response, _method, output);
         }
       }catch(e){
         context.exception = e;
       }
-      context?.setOutput(name, output);
+      context.setOutput(name, output);
       return output;
     }).catchError(
       (e) => context.exception = e

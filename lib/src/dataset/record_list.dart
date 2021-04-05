@@ -61,13 +61,13 @@ class RecordList implements List<Record>{
 
   final RecordSchema _schema;
   final List<Record> _records;
-  final Map<Object,Record> _primaryKeyMap;
-  DataSet _dataSet;
+  final Map<Object?,Record>? _primaryKeyMap;
+  DataSet? _dataSet;
 
   RecordList(RecordSchema schema)
    : _schema = schema,
-    _records = List<Record>(),
-    _primaryKeyMap = schema.hasPrimary ? Map<Object,Record>() : null;
+    _records = [],
+    _primaryKeyMap = schema.hasPrimary ? Map<Object?,Record>() : null;
 
   /// Schema definition
   RecordSchema get schema => _schema;
@@ -75,9 +75,9 @@ class RecordList implements List<Record>{
   /// The parent DataSet, which is null if it is an independent RecordList.
   set dataSet(ds){
     _dataSet = ds;
-    _records?.forEach((record) => record.dataSet = ds);
+    _records.forEach((record) => record.dataSet = ds);
   }
-  DataSet get dataSet => _dataSet;
+  DataSet? get dataSet => _dataSet;
 
   @override
   Record get first => _records.first;
@@ -131,12 +131,15 @@ class RecordList implements List<Record>{
 
   @override
   void operator []=(int index, Record value){
-    if(_schema.hasPrimary && _primaryKeyMap.containsKey(value.primaryKey)){
+    if(_schema != value.schema){
+        throw Exception("Schema is unmatch. this schema=$_schema, schema=${value.schema}");
+    }
+    if(_schema.hasPrimary && _primaryKeyMap!.containsKey(value.primaryKey)){
       Record removeRecord = _records[index];
       if(value.primaryKey != removeRecord.primaryKey){
         throw Exception("Primary key is duplicate.primaryKey=${value.primaryKey}");
       }
-      _primaryKeyMap[value.primaryKey] = value;
+      _primaryKeyMap![value.primaryKey] = value;
     }
     _records[index]=value;
   }
@@ -152,10 +155,10 @@ class RecordList implements List<Record>{
   @override
   void add(Record value){
     if(_schema.hasPrimary){
-      if(_primaryKeyMap.containsKey(value.primaryKey)){
+      if(_primaryKeyMap!.containsKey(value.primaryKey)){
         throw Exception("Primary key is duplicate.primaryKey=${value.primaryKey}");
       }
-      _primaryKeyMap[value.primaryKey] = value;
+      _primaryKeyMap![value.primaryKey] = value;
     }
     _records.add(value);
   }
@@ -185,13 +188,13 @@ class RecordList implements List<Record>{
   @override
   void clear() {
     if(_schema.hasPrimary){
-      _primaryKeyMap.clear();
+      _primaryKeyMap!.clear();
     }
     _records.clear();
   }
 
   @override
-  bool contains(Object element) {
+  bool contains(Object? element) {
     return _records.contains(element);
   }
 
@@ -201,7 +204,7 @@ class RecordList implements List<Record>{
   // Create a Record.
   // 
   // To create a record with a value, specify [values]. Without arguments, it is the same as calling [fromMap()] after calling this method.
-  Record createRecord({Map<String,Object> values}){
+  Record createRecord({Map<String,Object>? values}){
     Record record = Record(_schema);
     record.dataSet = _dataSet;
     if(values != null){
@@ -226,12 +229,12 @@ class RecordList implements List<Record>{
   }
 
   @override
-  void fillRange(int start, int end, [Record fillValue]) {
+  void fillRange(int start, int end, [Record? fillValue]) {
     _records.fillRange(start, end, fillValue);
   }
 
   @override
-  Record firstWhere(bool test(Record element), {Record orElse()}) {
+  Record firstWhere(bool test(Record element), {Record orElse()?}) {
     return _records.firstWhere(test, orElse:orElse);
   }
    
@@ -252,7 +255,7 @@ class RecordList implements List<Record>{
   }
 
   /// Copies the value of the specified RecordList to this RecordList.
-  RecordList fromRecordList(RecordList list){
+  RecordList fromRecordList(RecordList? list){
     if(list == null){
       return this;
     }
@@ -267,7 +270,7 @@ class RecordList implements List<Record>{
   }
 
   /// Copies the value of the specified List to this RecordList.
-  RecordList fromMap(List<dynamic> list){
+  RecordList fromMap(List<dynamic>? list){
     if(list == null){
       return this;
     }
@@ -282,7 +285,7 @@ class RecordList implements List<Record>{
   }
 
   /// Copies the value of the specified Map to this RecordList.
-  RecordList fromMapByMap(Map<dynamic, dynamic> map){
+  RecordList fromMapByMap(Map<dynamic?, dynamic?>? map){
     if(map == null){
       return this;
     }
@@ -297,12 +300,12 @@ class RecordList implements List<Record>{
               }else{
                 if(value is Map){
                   if(field.isRecord){
-                    rec.setByName(field.name, _dataSet.createNestedRecord(field.schema).fromMap(value));
+                    rec.setByName(field.name, _dataSet == null || field.schema == null ? null : _dataSet!.createNestedRecord(field.schema!).fromMap(value as Map<String, Object?>?));
                   }else{
-                    rec.fromMap(value);
+                    rec.fromMap(value as Map<String, Object?>?);
                   }
                 }else if(value is List && field.isRecordList){
-                  rec.setByName(field.name, _dataSet.createNestedRecordList(field.schema).fromMap(value));
+                  rec.setByName(field.name, _dataSet == null || field.schema == null ? null : _dataSet!.createNestedRecordList(field.schema!).fromMap(value));
                 }else{
                   rec.setByName(field.name, value);
                 }
@@ -322,8 +325,8 @@ class RecordList implements List<Record>{
   /// 
   /// If [hasNull] is set to false, fields with a value of null will not be output. this can be used to reduce the output when there is no need to tell that they are null.
   /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
-  List<Map<String,Object>> toMap({bool hasNull=true,bool toJsonType=false}){
-    List<Map<String,Object>> list = List();
+  List<Map<String,Object?>> toMap({bool hasNull=true,bool toJsonType=false}){
+    List<Map<String,Object?>> list = [];
     Iterator<Record> itr = iterator;
     while(itr.moveNext()){
       list.add(itr.current.toMap(hasNull:hasNull, toJsonType:toJsonType));
@@ -334,7 +337,7 @@ class RecordList implements List<Record>{
   /// Copies the value of the specified List to this RecordList.
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
-  RecordList fromList(List<dynamic> list,[Map<String,dynamic> recordListSchemaMap, Map<String,dynamic> schemaMap]){
+  RecordList fromList(List<dynamic>? list,[Map<String,dynamic?>? recordListSchemaMap, Map<String,dynamic?>? schemaMap]){
     if(list == null){
       return this;
     }
@@ -351,8 +354,8 @@ class RecordList implements List<Record>{
   /// Output the value of this RecordList to the List
   /// 
   /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
-  List<List<Object>> toDeepList({bool toJsonType=false}){
-    List<List<Object>> list = List();
+  List<List<Object?>> toDeepList({bool toJsonType=false}){
+    List<List<Object?>> list = [];
     Iterator<Record> itr = iterator;
     while(itr.moveNext()){
       list.add(itr.current.toList(toJsonType:toJsonType));
@@ -378,10 +381,10 @@ class RecordList implements List<Record>{
   @override
   void insert(int index, Record value) {
     if(_schema.hasPrimary){
-      if(_primaryKeyMap.containsKey(value.primaryKey)){
+      if(_primaryKeyMap!.containsKey(value.primaryKey)){
         throw Exception("Primary key is duplicate.primaryKey=${value.primaryKey}");
       }
-      _primaryKeyMap[value.primaryKey] = value;
+      _primaryKeyMap![value.primaryKey] = value;
     }
     _records.insert(index, value);
   }
@@ -399,17 +402,17 @@ class RecordList implements List<Record>{
   }
   
   @override
-  int lastIndexOf(Record element, [int start]) {
+  int lastIndexOf(Record element, [int? start]) {
     return _records.lastIndexOf(element, start);
   }
   
   @override
-  int lastIndexWhere(bool Function(Record element) test, [int start]) {
+  int lastIndexWhere(bool Function(Record element) test, [int? start]) {
     return _records.lastIndexWhere(test, start);
   }
   
   @override
-  Record lastWhere(bool Function(Record element) test, {Record Function() orElse}) {
+  Record lastWhere(bool Function(Record element) test, {Record Function()? orElse}) {
     return _records.lastWhere(test, orElse:orElse);
   }
   
@@ -419,11 +422,11 @@ class RecordList implements List<Record>{
   }
 
   /// Primary key search with the specified [Record] as the key.
-  Record primary(Record key){
+  Record? primary(Record key){
     if(!_schema.hasPrimary){
       return null;
     }
-    return _primaryKeyMap[key.primaryKey];
+    return _primaryKeyMap![key.primaryKey];
   }
   
   @override
@@ -436,8 +439,8 @@ class RecordList implements List<Record>{
   }
 
   @override
-  bool remove(Object value) {
-    if(!value is Record){
+  bool remove(Object? value) {
+    if(value != null && !(value is Record)){
       return false;
     }
     Record record = value as Record;
@@ -455,8 +458,8 @@ class RecordList implements List<Record>{
   @override
   Record removeAt(int index) {
     Record removed = _records.removeAt(index);
-    if(removed != null && _schema.hasPrimary){
-      _primaryKeyMap.remove(removed.primaryKey);
+    if(_schema.hasPrimary){
+      _primaryKeyMap!.remove(removed.primaryKey);
     }
     return removed;
   }
@@ -510,12 +513,12 @@ class RecordList implements List<Record>{
   }
   
   @override
-  void shuffle([Random random]) {
+  void shuffle([Random? random]) {
     _records.shuffle(random);
   }
   
   @override
-  Record singleWhere(bool test(Record element), {Record orElse()}) {
+  Record singleWhere(bool test(Record element), {Record orElse()?}) {
     return _records.singleWhere(test, orElse:orElse);
   }
   
@@ -530,22 +533,22 @@ class RecordList implements List<Record>{
   }
 
   @override
-  void sort([int Function(Record a, Record b) compare]) {
+  void sort([int Function(Record a, Record b)? compare]) {
     _records.sort(compare);
   }
 
   /// Sort by the specified field name.
   /// 
   /// The ascending/descending order is specified by the [isAsc] parameter.
-  void sortBy(List<String> names, [List<bool> isAsc]){
+  void sortBy(List<String> names, [List<bool>? isAsc]){
     sort(
       (a, b){
         int result = 0;
         for(int i = 0; i < names.length; i++){
           String name = names[i];
           bool asc = isAsc == null ? true : isAsc[i];
-          Object aVal = a[name];
-          Object bVal = b[name];
+          Object? aVal = a[name];
+          Object? bVal = b[name];
           if(aVal == null && bVal != null){
             result = asc ? -1 : 1;
             break;
@@ -573,7 +576,7 @@ class RecordList implements List<Record>{
   }
 
   @override
-  List<Record> sublist(int start, [int end]) {
+  List<Record> sublist(int start, [int? end]) {
     return _records.sublist(start, end);
   }
 

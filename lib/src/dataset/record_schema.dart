@@ -74,7 +74,7 @@ class RecordSchema{
 
   /// Output the schema to Map
   Map<String,Object> toMap(){
-    Map map = Map<String,Object>();
+    Map<String,Object> map = Map();
     for(int i = 0 ;i < _fields.length; i++){
       FieldSchema field = fields[i];
       String type = "value";
@@ -89,7 +89,7 @@ class RecordSchema{
         "type"  : type
       };
       if(type != "value"){
-        map[field.name]["schema"] = field.schema;
+        (map[field.name]! as Map<String,Object?>)["schema"] = field.schema;
       }
     }
     return map;

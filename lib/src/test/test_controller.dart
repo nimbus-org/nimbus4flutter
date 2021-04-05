@@ -6,7 +6,7 @@ abstract class TestController{
   final String _host;
   final int _port;
   final String _scheme;
-  final ApiServerUriBuilder _uriBuilder;
+  final ApiServerUriBuilder? _uriBuilder;
   
   TestController(
     {
@@ -14,7 +14,7 @@ abstract class TestController{
       String host = "localhost",
       int port = 8080,
       String scheme = "http",
-      ApiServerUriBuilder uriBuilder
+      ApiServerUriBuilder? uriBuilder
     }
   ) : _apiServerName = apiServerName,
       _host = host,
@@ -44,12 +44,12 @@ abstract class TestController{
   String get host => _host;
   int get port => _port;
   String get scheme => _scheme;
-  ApiServerUriBuilder get uriBuilder => _uriBuilder;
+  ApiServerUriBuilder? get uriBuilder => _uriBuilder;
 
   ApiServer buildApiServer();
 
-  Api<I,O> _getApi<I,O>(ApiName name){
-    return ApiRegistory.getApi(_enumToString(name));
+  Api<I,O>? _getApi<I,O>(ApiName name){
+    return ApiRegistory.getApi<I,O>(_enumToString(name));
   }
 
   String _enumToString(Object name){
@@ -86,130 +86,130 @@ abstract class TestController{
 
   Api<Map<String,dynamic>,Map<String,dynamic>> createApiOfGetTestCaseStatus(String serverName, String apiName);
 
-  Future<TestScenarioGroup> getCurrentScenarioGroup() async{
-    Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentScenarioGroup);
+  Future<TestScenarioGroup?> getCurrentScenarioGroup() async{
+    Api<void,Map<String,dynamic>>? api = _getApi(ApiName.getCurrentScenarioGroup);
     RequestContext context = RequestContext();
-    Map<String,dynamic> json = await api.request(null, context);
-    return json['CurrentScenarioGroup'] == null ? null : TestScenarioGroup.from(json['CurrentScenarioGroup']);
+    Map<String,dynamic>? json = await api?.request(null, context);
+    return json?['CurrentScenarioGroup'] == null ? null : TestScenarioGroup.from(json!['CurrentScenarioGroup']);
   }
 
-  Future<TestScenario> getCurrentScenario() async{
-    Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentScenario);
+  Future<TestScenario?> getCurrentScenario() async{
+    Api<void,Map<String,dynamic>>? api = _getApi(ApiName.getCurrentScenario);
     RequestContext context = RequestContext();
-    Map<String,dynamic> json = await api.request(null, context);
-    return json['CurrentScenario'] == null ? null : TestScenario.from(json['CurrentScenario']);
+    Map<String,dynamic>? json = await api?.request(null, context);
+    return json?['CurrentScenario'] == null ? null : TestScenario.from(json!['CurrentScenario']);
   }
 
-  Future<TestCase> getCurrentTestCase() async{
-    Api<void,Map<String,dynamic>> api = _getApi(ApiName.getCurrentTestCase);
+  Future<TestCase?> getCurrentTestCase() async{
+    Api<void,Map<String,dynamic>>? api = _getApi(ApiName.getCurrentTestCase);
     RequestContext context = RequestContext();
-    Map<String,dynamic> json = await api.request(null, context);
-    return json['CurrentTestCase'] == null ? null : TestCase.from(json['CurrentTestCase']);
+    Map<String,dynamic>? json = await api?.request(null, context);
+    return json?['CurrentTestCase'] == null ? null : TestCase.from(json!['CurrentTestCase']);
   }
 
-  Future<String> getTestPhase() async{
-    Api<void,Map<String,dynamic>> api = _getApi(ApiName.getTestPhase);
+  Future<String?> getTestPhase() async{
+    Api<void,Map<String,dynamic>>? api = _getApi(ApiName.getTestPhase);
     RequestContext context = RequestContext();
-    Map<String,dynamic> json = await api.request(null, context);
-    return json['phase'];
+    Map<String,dynamic>? json = await api?.request(null, context);
+    return json?['phase'];
   }
 
   Future<void> startScenarioGroup(String userId, String scenarioGroupId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.startScenarioGroup);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.startScenarioGroup);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['userId'] = userId;
-    input['scenarioGroupId'] = scenarioGroupId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['userId'] = userId;
+    input?['scenarioGroupId'] = scenarioGroupId;
+    await api?.request(input, context);
   }
 
   Future<void> endScenarioGroup() async{
-    Api<void,Map<String,dynamic>> api = _getApi(ApiName.endScenarioGroup);
+    Api<void,Map<String,dynamic>>? api = _getApi(ApiName.endScenarioGroup);
     RequestContext context = RequestContext();
-    await api.request(null, context);
+    await api?.request(null, context);
   }
 
   Future<void> startScenario(String userId, String scenarioId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.startScenario);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.startScenario);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['userId'] = userId;
-    input['scenarioId'] = scenarioId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['userId'] = userId;
+    input?['scenarioId'] = scenarioId;
+    await api?.request(input, context);
   }
 
   Future<void> cancelScenario(String scenarioId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.cancelScenario);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.cancelScenario);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioId'] = scenarioId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioId'] = scenarioId;
+    await api?.request(input, context);
   }
 
   Future<void> endScenario(String scenarioId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.endScenario);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.endScenario);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioId'] = scenarioId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioId'] = scenarioId;
+    await api?.request(input, context);
   }
 
   Future<void> startTestCase(String userId, String scenarioId, String testcaseId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.startTestCase);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.startTestCase);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['userId'] = userId;
-    input['scenarioId'] = scenarioId;
-    input['testcaseId'] = testcaseId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['userId'] = userId;
+    input?['scenarioId'] = scenarioId;
+    input?['testcaseId'] = testcaseId;
+    await api?.request(input, context);
   }
 
   Future<void> cancelTestCase(String scenarioId, String testcaseId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.cancelTestCase);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.cancelTestCase);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioId'] = scenarioId;
-    input['testcaseId'] = testcaseId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioId'] = scenarioId;
+    input?['testcaseId'] = testcaseId;
+    await api?.request(input, context);
   }
 
   Future<void> endTestCase(String scenarioId, String testcaseId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.endTestCase);
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.endTestCase);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioId'] = scenarioId;
-    input['testcaseId'] = testcaseId;
-    await api.request(input, context);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioId'] = scenarioId;
+    input?['testcaseId'] = testcaseId;
+    await api?.request(input, context);
   }
 
-  Future<TestScenarioGroupStatus> getTestScenarioGroupStatus(String scenarioGroupId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.getTestScenarioGroupStatus);
+  Future<TestScenarioGroupStatus?> getTestScenarioGroupStatus(String scenarioGroupId) async{
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.getTestScenarioGroupStatus);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioGroupId'] = scenarioGroupId;
-    Map<String,dynamic> json = await api.request(input, context);
-    return json['TestScenarioGroupStatus'] == null ? null : TestScenarioGroupStatus.from(json['TestScenarioGroupStatus']);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioGroupId'] = scenarioGroupId;
+    Map<String,dynamic>? json = await api?.request(input, context);
+    return json?['TestScenarioGroupStatus'] == null ? null : TestScenarioGroupStatus.from(json!['TestScenarioGroupStatus']);
   }
 
-  Future<TestScenarioStatus> getTestScenarioStatus(String scenarioGroupId, String scenarioId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.getTestScenarioStatus);
+  Future<TestScenarioStatus?> getTestScenarioStatus(String scenarioGroupId, String scenarioId) async{
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.getTestScenarioStatus);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioGroupId'] = scenarioGroupId;
-    input['scenarioId'] = scenarioId;
-    Map<String,dynamic> json = await api.request(input, context);
-    return json['TestScenarioStatus'] == null ? null : TestScenarioStatus.from(json['TestScenarioStatus']);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioGroupId'] = scenarioGroupId;
+    input?['scenarioId'] = scenarioId;
+    Map<String,dynamic>? json = await api?.request(input, context);
+    return json?['TestScenarioStatus'] == null ? null : TestScenarioStatus.from(json!['TestScenarioStatus']);
   }
 
-  Future<TestCaseStatus> getTestCaseStatus(String scenarioGroupId, String scenarioId, String testcaseId) async{
-    Api<Map<String,dynamic>,Map<String,dynamic>> api = _getApi(ApiName.getTestCaseStatus);
+  Future<TestCaseStatus?> getTestCaseStatus(String scenarioGroupId, String scenarioId, String testcaseId) async{
+    Api<Map<String,dynamic>,Map<String,dynamic>>? api = _getApi(ApiName.getTestCaseStatus);
     RequestContext context = RequestContext();
-    Map<String,dynamic> input = api.getInput(context);
-    input['scenarioGroupId'] = scenarioGroupId;
-    input['scenarioId'] = scenarioId;
-    input['testcaseId'] = testcaseId;
-    Map<String,dynamic> json = await api.request(input, context);
-    return json['TestCaseStatus'] == null ? null : TestCaseStatus.from(json['TestCaseStatus']);
+    Map<String,dynamic>? input = api?.getInput(context);
+    input?['scenarioGroupId'] = scenarioGroupId;
+    input?['scenarioId'] = scenarioId;
+    input?['testcaseId'] = testcaseId;
+    Map<String,dynamic>? json = await api?.request(input, context);
+    return json?['TestCaseStatus'] == null ? null : TestCaseStatus.from(json!['TestCaseStatus']);
   }
 }
 

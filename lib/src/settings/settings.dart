@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../nimbus4flutter.dart';
 
-Future<T> loadSetting<T>(String name, T setting) async{
+Future<T?> loadSetting<T>(String name, T setting) async{
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String settingJson = prefs.getString(name);
+  String? settingJson = prefs.getString(name);
   if(settingJson == null){
     return null;
   }

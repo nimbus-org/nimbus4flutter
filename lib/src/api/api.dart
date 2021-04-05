@@ -43,13 +43,13 @@ class RequestContext{
   RequestContext();
 
   /// Get the input DTO of a specified API name.
-  I getInput<I>(String api){
+  I? getInput<I>(String api){
     return _inputs[api] as I;
   }
 
   /// Set the input DTO of a specified API name.
-  void setInput(String api, Object input){
-    _inputs[api] = input;  
+  void setInput(String api, Object? input){
+    _inputs[api] = input!;  
   }
 
   /// Get the output DTO of a specified API name.
@@ -58,13 +58,13 @@ class RequestContext{
   }
 
   /// Set the output DTO of a specified API name.
-  void setOutput(String api, Object output){
-    _outputs[api] = output;  
+  void setOutput(String api, Object? output){
+    _outputs[api] = output!;  
   }
 
   /// Get attribute of a specified name.
-  T getAttribute<T>(String name){
-    return _attributes[name];
+  T? getAttribute<T>(String name){
+    return _attributes[name] as T;
   }
 
   /// Set attribute of a specified name.
@@ -85,17 +85,17 @@ abstract class Api<I,O>{
   get name => _name;
 
   /// Get the input DTO that is the source of the request to the server.
-  I getInput(RequestContext context);
+  I? getInput(RequestContext context);
 
   /// Request to the server.
-  Future<O> request(I input, RequestContext context);
+  Future<O?> request(I? input, RequestContext context);
 }
 
 /// Function to create a DTO for input and output to an API.
-typedef ApiInOutCreator<T> = T Function(RequestContext context);
+typedef ApiInOutCreator<T> = T? Function(RequestContext context);
 
 /// Function to create a DTO for input and output to an API.
-typedef UriBuilder<I> = Uri Function(String scheme, String host, int port, String path, I input, RequestContext context, Function(String scheme, String host, int port, String path, I input) serverBuilder);
+typedef UriBuilder<I> = Uri Function(String scheme, String host, int? port, String path, I? input, RequestContext context, Function(String scheme, String host, int port, String path, I? input)? serverBuilder);
 
 /// HTTP Methods enumeration.
 enum HttpMethod{
@@ -185,15 +185,15 @@ enum HttpMethod{
 @immutable
 class SequencialApi<I,O> extends Api<I,O>{
   final List<Api> _apis;
-  final ApiInOutCreator<I> _inputCreator;
-  final ApiInOutCreator<O> _outputCreator;
+  final ApiInOutCreator<I>? _inputCreator;
+  final ApiInOutCreator<O>? _outputCreator;
 
   SequencialApi(
     {
-      @required String name,
-      @required List<Api> apis,
-      ApiInOutCreator<I> inputCreator,
-      ApiInOutCreator<O> outputCreator
+      required String name,
+      required List<Api> apis,
+      ApiInOutCreator<I>? inputCreator,
+      ApiInOutCreator<O>? outputCreator
     }
   ): _apis = apis,
     _inputCreator = inputCreator,
@@ -201,22 +201,22 @@ class SequencialApi<I,O> extends Api<I,O>{
     super(name);
   
   @override
-  I getInput(RequestContext context) => _inputCreator == null ? _apis[0].getInput(context) : _inputCreator(context);
+  I? getInput(RequestContext context) => _inputCreator == null ? _apis[0].getInput(context) : _inputCreator!(context);
 
   @override
-  Future<O> request(I input, RequestContext context) async{
+  Future<O?> request(I? input, RequestContext context) async{
     context.setInput(name, input);
-    Object inp = input;
-    List<Object> outputs = List();
+    Object? inp = input;
+    List<Object> outputs = [];
     for(int i = 0; i < _apis.length; i++){
       if(i != 0 || _inputCreator != null){
         inp = _apis[i].getInput(context);
       }
       outputs.add(await _apis[i].request(inp, context));
     }
-    O output = _outputCreator == null ? outputs : _outputCreator(context);
+    Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
     context.setOutput(name, output);
-    return output;
+    return output as O;
  }
 }
 
@@ -269,12 +269,12 @@ class SequencialApi<I,O> extends Api<I,O>{
 @immutable
 class ParallelApi<O> extends Api<List<Object>,O>{
   final List<Api> _apis;
-  final ApiInOutCreator<O> _outputCreator;
+  final ApiInOutCreator<O>? _outputCreator;
   ParallelApi(
     {
-      @required String name,
-      @required List<Api> apis,
-      ApiInOutCreator<O> outputCreator
+      required String name,
+      required List<Api> apis,
+      ApiInOutCreator<O>? outputCreator
     }
   ): _apis = apis,
     _outputCreator = outputCreator,
@@ -282,7 +282,7 @@ class ParallelApi<O> extends Api<List<Object>,O>{
   
   @override
   List<Object> getInput(RequestContext context){
-    List<Object> inputs = List();
+    List<Object> inputs = [];
     for(Api api in _apis){
       inputs.add(api.getInput(context));
     }
@@ -290,20 +290,20 @@ class ParallelApi<O> extends Api<List<Object>,O>{
   }
 
   @override
-  Future<O> request(List<Object> input, RequestContext context) async{
+  Future<O?> request(List<Object>? input, RequestContext context) async{
     context.setInput(name, input);
-    List<Future<Object>> outputFutures = List();
+    List<Future<dynamic>> outputFutures = [];
     for(int i = 0; i < _apis.length; i++){
-      outputFutures.add(_apis[i].request(input[i], context));
+      outputFutures.add(_apis[i].request(input == null ? null : input[i], context));
     }
-    List<Object> outputs = List();
+    List<Object> outputs = [];
     for(Future outputFuture in outputFutures){
       Object output = await outputFuture;
       outputs.add(output);
     }
     context.setOutput(name, outputs);
-    O output = _outputCreator == null ? outputs : _outputCreator(context);
+    Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
     context.setOutput(name, output);
-    return output;
+    return output as O;
  }
 }

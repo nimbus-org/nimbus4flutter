@@ -36,9 +36,9 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 typedef ApiServerIOClientBuilder = void Function(io.HttpClient client);
 
-typedef ApiServerIORequestBuilder = void Function(io.HttpClientRequest request, HttpMethod method, Object input);
+typedef ApiServerIORequestBuilder = void Function(io.HttpClientRequest request, HttpMethod method, Object? input);
 
-typedef ApiServerIOResponseParser = Future<void> Function(io.HttpClientResponse response, HttpMethod method, Object output);
+typedef ApiServerIOResponseParser = Future<void> Function(io.HttpClientResponse response, HttpMethod method, Object? output);
 
 /// It contains information about the server with the API and its processing.
 /// 
@@ -77,8 +77,8 @@ typedef ApiServerIOResponseParser = Future<void> Function(io.HttpClientResponse 
 /// ```
 @immutable
 class ApiServerIO extends ApiServer{
-  final ApiServerIORequestBuilder _requestBuilder;
-  final ApiServerIOResponseParser _responseParser;
+  final ApiServerIORequestBuilder? _requestBuilder;
+  final ApiServerIOResponseParser? _responseParser;
 
   final io.HttpClient _client = io.HttpClient();
 
@@ -94,14 +94,14 @@ class ApiServerIO extends ApiServer{
   /// In [responseParser], specify the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
   ApiServerIO(
     {
-      @required String name,
-      @required String host,
-      int port,
+      required String name,
+      required String host,
+      int? port,
       String scheme = "http",
-      ApiServerIOClientBuilder builder,
-      ApiServerUriBuilder uriBuilder,
-      ApiServerIORequestBuilder requestBuilder,
-      ApiServerIOResponseParser responseParser
+      ApiServerIOClientBuilder? builder,
+      ApiServerUriBuilder? uriBuilder,
+      ApiServerIORequestBuilder? requestBuilder,
+      ApiServerIOResponseParser? responseParser
     }
   ): _requestBuilder = requestBuilder,
      _responseParser = responseParser,
@@ -114,10 +114,10 @@ class ApiServerIO extends ApiServer{
   io.HttpClient get client => _client;
 
   /// The process of building HttpClientRequest, an HTTP request to the server.
-  ApiServerIORequestBuilder get requestBuilder => _requestBuilder;
+  ApiServerIORequestBuilder? get requestBuilder => _requestBuilder;
 
   /// the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
-  ApiServerIOResponseParser get responseParser => _responseParser;
+  ApiServerIOResponseParser? get responseParser => _responseParser;
 
   /// Close server.
   @override

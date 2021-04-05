@@ -24,8 +24,8 @@ void main() {
           "fieldName2" :  2
         }
       ));
-      expect(list.primary(list.createRecord(values: {"fieldName1" : "hoge"}))["fieldName2"], 1);
-      expect(list.primary(list.createRecord(values: {"fieldName1" : "fuga"}))["fieldName2"], 2);
+      expect(list.primary(list.createRecord(values: {"fieldName1" : "hoge"}))!["fieldName2"], 1);
+      expect(list.primary(list.createRecord(values: {"fieldName1" : "fuga"}))!["fieldName2"], 2);
       expect(list.primary(list.createRecord(values: {"fieldName1" : "piyo"})), null);
     });
    test('non primary test', () {

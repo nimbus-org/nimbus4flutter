@@ -117,7 +117,7 @@ class ApiRegistory{
   }
   
   /// Get [ApiServer] with the specified name
-  static ApiServer getApiServer(String name){
+  static ApiServer? getApiServer(String name){
     return apiServerRegistory[name];
   }
   
@@ -127,8 +127,8 @@ class ApiRegistory{
   }
   
   /// Get [Api] with the specified name
-  static Api getApi(String name){
-    return apiRegistory[name];
+  static Api<I,O>? getApi<I, O>(String name){
+    return apiRegistory[name] as Api<I,O>;
   }
 
   /// Close repository.

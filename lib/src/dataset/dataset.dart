@@ -95,12 +95,12 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 class DataSet{
 
   /// Name of this DataSet.
-  String name;
+  String? name;
 
-  Map<String,Record> _headers = Map();
-  Map<String,RecordList> _recordLists = Map();
-  Map<String,RecordSchema> _nestedRecordSchemata = Map();
-  Map<String,RecordSchema> _nestedRecordListSchemata = Map();
+  Map<String?,Record> _headers = Map();
+  Map<String?,RecordList> _recordLists = Map();
+  Map<String?,RecordSchema> _nestedRecordSchemata = Map();
+  Map<String?,RecordSchema> _nestedRecordListSchemata = Map();
 
   DataSet.empty():this(null);
 
@@ -109,7 +109,7 @@ class DataSet{
   /// Define the schema of the header part [Record], which is a one-dimensional data structure.
   /// 
   /// If [name] is not specified, it is treated as an unnamed header.
-  void setHeaderSchema(RecordSchema schema,[String name]){
+  void setHeaderSchema(RecordSchema schema,[String? name]){
     Record record = Record(schema);
     record.dataSet = this;
     _headers[name] = record;
@@ -118,7 +118,7 @@ class DataSet{
   /// Define the schema of the list part [RecordList], which is a two-dimensional data structure.
   /// 
   /// If [name] is not specified, it is treated as an unnamed list.
-  void setRecordListSchema(RecordSchema schema,[String name]){
+  void setRecordListSchema(RecordSchema schema,[String? name]){
     RecordList recordList = RecordList(schema);
     recordList.dataSet = this;
     _recordLists[name] = recordList;
@@ -136,7 +136,7 @@ class DataSet{
 
   /// Creates a nested [Record] with the specified name.
   Record createNestedRecord(String name){
-    RecordSchema schema = _nestedRecordSchemata[name];
+    RecordSchema? schema = _nestedRecordSchemata[name];
     if(schema == null){
       throw Exception("Schema is not defined.name=$name");
     }
@@ -147,7 +147,7 @@ class DataSet{
 
   /// Creates a nested [RecordList] with the specified name.
   RecordList createNestedRecordList(String name){
-    RecordSchema schema = _nestedRecordListSchemata[name];
+    RecordSchema? schema = _nestedRecordListSchemata[name];
     if(schema == null){
       throw Exception("Schema is not defined.name=$name");
     }
@@ -159,14 +159,14 @@ class DataSet{
   /// Get the header of the specified name.
   /// 
   /// If you don't specify [name], you will get an unnamed header.
-  Record getHeader([String name]){
+  Record? getHeader([String? name]){
     return _headers[name];
   }
 
   /// Set the header of the specified name to the specified value.
   /// 
   /// If you don't specify [name], you will set an unnamed header.
-  void setHeader(Record record, [String name]){
+  void setHeader(Record record, [String? name]){
     record.dataSet = this;
     _headers[name] = record;
   }
@@ -174,14 +174,14 @@ class DataSet{
   /// Get the list of the specified name.
   /// 
   /// If you don't specify [name], you will get an unnamed list.
-  RecordList getRecordList([String name]){
+  RecordList? getRecordList([String? name]){
     return _recordLists[name];
   }
   
   /// Set the lsit of the specified name to the specified value.
   /// 
   /// If you don't specify [name], you will set an unnamed list.
-  void setRecordList(RecordList list, [String name]){
+  void setRecordList(RecordList list, [String? name]){
     list.dataSet = this;
     _recordLists[name] = list;
   }
@@ -221,7 +221,7 @@ class DataSet{
   ///    }
   ///  }
   /// ```
-  DataSet fromMap(Map<String,Object> map){
+  DataSet fromMap(Map<String,Object?>? map){
     if(map == null){
       return this;
     }
@@ -229,23 +229,23 @@ class DataSet{
     if(name == null){
       name = dsEntry.key;
     }
-    Map<String,Object> dsMap = dsEntry.value;
-    Map<String,Object> headers = dsMap["header"];
+    Map<String?,Object?> dsMap = dsEntry.value;
+    Map<String?,Object?>? headers = dsMap["header"] as Map<String?,Object?>?;
     if(headers != null){
       headers.forEach(
         (name, value){
-          Record header = _headers[name?.length == 0 ? null : name];
+          Record? header = _headers[name?.length == 0 ? null : name];
           if(header != null){
-            header.fromMap(value);
+            header.fromMap(value as Map<String,Object?>);
           }
         }
       );
     }
-    Map<String,Object> recordLists = dsMap["recordList"];
+    Map<String?,Object?>? recordLists = dsMap["recordList"] as Map<String?,Object?>?;
     if(recordLists != null){
       recordLists.forEach(
         (name, value){
-          RecordList list = _recordLists[name?.length == 0 ? null : name];
+          RecordList? list = _recordLists[name?.length == 0 ? null : name];
           if(list != null){
             if(value is List){
               list.fromMap(value);
@@ -262,50 +262,40 @@ class DataSet{
   Map<String,Object> _toSchemaMap(bool toJsonType){
     Map<String,Object> schemaMap = new Map();
     if(_headers.isNotEmpty){
-      Map<String,Object> headerSchemaMap = new Map();
+      Map<String?,Object> headerSchemaMap = new Map();
       schemaMap["header"] = headerSchemaMap;
       _headers.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
+          if(value.schema != null){
+            headerSchemaMap[name == null && toJsonType ? "" : name] = value.schema!.toMap();
           }
-          headerSchemaMap[name] = value.schema.toMap();
         }
       );
     }
     if(_recordLists.isNotEmpty){
-      Map<String,Object> recordListSchemaMap = new Map();
+      Map<String?,Object> recordListSchemaMap = new Map();
       schemaMap["recordList"] = recordListSchemaMap;
       _recordLists.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
-          }
-          recordListSchemaMap[name] = value.schema.toMap();
+          recordListSchemaMap[name == null && toJsonType ? "" : name] = value.schema.toMap();
         }
       );
     }
     if(_nestedRecordSchemata.isNotEmpty){
-      Map<String,Object> nestedRecordSchemaMap = new Map();
+      Map<String?,Object> nestedRecordSchemaMap = new Map();
       schemaMap["nestedRecord"] = nestedRecordSchemaMap;
       _nestedRecordSchemata.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
-          }
-          nestedRecordSchemaMap[name] = value.toMap();
+          nestedRecordSchemaMap[name == null && toJsonType ? "" : name] = value.toMap();
         }
       );
     }
     if(_nestedRecordListSchemata.isNotEmpty){
-      Map<String,Object> nestedRecordListSchemaMap = new Map();
+      Map<String?,Object> nestedRecordListSchemaMap = new Map();
       schemaMap["nestedRecordList"] = nestedRecordListSchemaMap;
       _nestedRecordListSchemata.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
-          }
-          nestedRecordListSchemaMap[name] = value.toMap();
+          nestedRecordListSchemaMap[name == null && toJsonType ? "" : name] = value.toMap();
         }
       );
     }
@@ -318,36 +308,30 @@ class DataSet{
   /// If [isOutputSchema] is set to true, the schema information is output. You can specify this if you don't want to share the schema with the other party, but you don't need to specify this in general.
   /// If [toJsonType] is set to true, fields of unsuitable JSON types will be attempted to be converted to String.
   Map<String,Object> toMap({bool hasNull=true, bool isOutputSchema=false, bool toJsonType=false}){
-    Map map = Map<String,Object>();
+    Map<String,Object> map = Map();
     if(isOutputSchema){
       map["schema"] = _toSchemaMap(toJsonType);
     }
     if(_headers.isNotEmpty){
-      Map<String,Object> headerMap = new Map();
+      Map<String?,Object> headerMap = new Map();
       map["header"] = headerMap;
       _headers.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
-          }
-          headerMap[name] = value.toMap(hasNull:hasNull,toJsonType:toJsonType);
+          headerMap[name == null && toJsonType ? "" : name] = value.toMap(hasNull:hasNull,toJsonType:toJsonType);
         }
       );
     }
     if(_recordLists.isNotEmpty){
-      Map<String,Object> recordListMap = new Map();
+      Map<String?,Object> recordListMap = new Map();
       map["recordList"] = recordListMap;
       _recordLists.forEach(
         (name, value){
-          if(toJsonType && name == null){
-            name = "";
-          }
-          recordListMap[name] = value.toMap(hasNull:hasNull,toJsonType:toJsonType);
+          recordListMap[name == null && toJsonType ? "" : name] = value.toMap(hasNull:hasNull,toJsonType:toJsonType);
         }
       );
     }
-    Map dsMap = Map<String,Object>();
-    dsMap[name == null ? "" : name] = map;
+    Map<String,Object> dsMap = Map();
+    dsMap[name == null ? "" : name!] = map;
     return dsMap;
   }
 
@@ -372,7 +356,7 @@ class DataSet{
   ///    }
   ///  }
   /// ```
-  DataSet fromList(Map<String,dynamic> map,{bool isListHeader:true, bool isListRecordList:true}){
+  DataSet fromList(Map<String,dynamic>? map,{bool isListHeader:true, bool isListRecordList:true}){
     if(map == null){
       return this;
     }
@@ -380,17 +364,17 @@ class DataSet{
     if(name == null){
       name = dsEntry.key;
     }
-    Map<String,dynamic> dsMap = dsEntry.value;
-    Map<String,dynamic> schemaMap = dsMap["schema"];
-    Map<String,dynamic> headerSchemata = schemaMap == null ? null : schemaMap["header"];
-    Map<String,dynamic> headers = dsMap["header"];
+    Map<String,dynamic?> dsMap = dsEntry.value;
+    Map<String,dynamic?>? schemaMap = dsMap["schema"];
+    Map<String?,dynamic?>? headerSchemata = schemaMap == null ? null : schemaMap["header"];
+    Map<String?,dynamic?>? headers = dsMap["header"];
     if(headers != null){
       headers.forEach(
         (name, value){
-          Record header = _headers[name?.length == 0 ? null : name];
+          Record? header = _headers[name?.length == 0 ? null : name];
           if(header != null){
             if(isListHeader){
-              Map<String,dynamic> headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
+              Map<String,dynamic>? headerSchema = headerSchemata == null ? null : headerSchemata[name?.length == 0 ? null : name];
               header.fromList(value, headerSchema, schemaMap);
             }else{
               header.fromMap(value);
@@ -399,15 +383,15 @@ class DataSet{
         }
       );
     }
-    Map<String,dynamic> recordListSchemata = schemaMap == null ? null : schemaMap["recordList"];
-    Map<String,dynamic> recordLists = dsMap["recordList"];
+    Map<String?,dynamic?>? recordListSchemata = schemaMap == null ? null : schemaMap["recordList"];
+    Map<String?,dynamic?>? recordLists = dsMap["recordList"];
     if(recordLists != null){
       recordLists.forEach(
         (name, value){
-          RecordList list = _recordLists[name?.length == 0 ? null : name];
+          RecordList? list = _recordLists[name?.length == 0 ? null : name];
           if(list != null){
             if(isListRecordList){
-              Map<String,dynamic> recordListSchema = recordListSchemata == null ? null : recordListSchemata[name?.length == 0 ? null : name];
+              Map<String,dynamic?>? recordListSchema = recordListSchemata == null ? null : recordListSchemata[name?.length == 0 ? null : name];
               list.fromList(value, recordListSchema, schemaMap);
             }else{
               list.fromMap(value);
@@ -440,7 +424,7 @@ class DataSet{
       map["schema"] = _toSchemaMap(toJsonType);
     }
     if(_headers.isNotEmpty){
-      Map<String,Object> headerMap = new Map();
+      Map<String?,Object> headerMap = new Map();
       map["header"] = headerMap;
       _headers.forEach(
         (name, value){
@@ -456,7 +440,7 @@ class DataSet{
       );
     }
     if(_recordLists.isNotEmpty){
-      Map<String,Object> recordListMap = new Map();
+      Map<String?,Object> recordListMap = new Map();
       map["recordList"] = recordListMap;
       _recordLists.forEach(
         (name, value){
@@ -471,8 +455,8 @@ class DataSet{
         }
       );
     }
-    Map dsMap = Map<String,Object>();
-    dsMap[name == null ? "" : name] = map;
+    Map<String,Object> dsMap = Map();
+    dsMap[name == null ? "" : name!] = map;
     return dsMap;
   }
 
@@ -522,7 +506,7 @@ class QueryDataSet extends DataSet{
 
   QueryDataSet.empty() : this(null);
 
-  QueryDataSet(String name):super(name){
+  QueryDataSet(String? name):super(name){
     this.setRecordListSchema(
       RecordSchema(
         [
@@ -566,22 +550,22 @@ class QueryDataSet extends DataSet{
   /// It is a RecordList that specifies the query to the header.
   /// 
   /// See [QueryDataSetField] for a list of possible field names
-  RecordList get headerQuery =>  getRecordList(_HEADER_QUERY);
+  RecordList get headerQuery =>  getRecordList(_HEADER_QUERY)!;
   
   /// It is a RecordList that specifies the query to the lsit.
   /// 
   /// See [QueryDataSetField] for a list of possible field names
-  RecordList get recordListQuery =>  getRecordList(_RECORD_LIST_QUERY);
+  RecordList get recordListQuery =>  getRecordList(_RECORD_LIST_QUERY)!;
   
   /// It is a RecordList that specifies the query to the nested header.
   /// 
   /// See [QueryDataSetField] for a list of possible field names
-  RecordList get nestedRecordQuery =>  getRecordList(_NESTED_RECORD_QUERY);
+  RecordList get nestedRecordQuery =>  getRecordList(_NESTED_RECORD_QUERY)!;
   
   /// It is a RecordList that specifies the query to the nested list.
   /// 
   /// See [QueryDataSetField] for a list of possible field names
-  RecordList get nestedRecordListQuery =>  getRecordList(_NESTED_RECORD_LIST_QUERY);
+  RecordList get nestedRecordListQuery =>  getRecordList(_NESTED_RECORD_LIST_QUERY)!;
 }
 
 /// Class that defines the field name of a DataSet with a query.

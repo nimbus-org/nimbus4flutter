@@ -38,9 +38,9 @@ import 'package:nimbus4flutter/nimbus4flutter.dart';
 
 typedef ApiServerHttpClientBuilder = void Function(Client client);
 
-typedef ApiServerHttpRequestBuilder = Future<void> Function(BaseRequest request, HttpMethod method, Object input);
+typedef ApiServerHttpRequestBuilder = Future<void> Function(BaseRequest request, HttpMethod method, Object? input);
 
-typedef ApiServerHttpResponseParser = Future<void> Function(BaseResponse response, HttpMethod method, Object output);
+typedef ApiServerHttpResponseParser = Future<void> Function(BaseResponse response, HttpMethod method, Object? output);
 
 /// It contains information about the server with the API and its processing.
 /// 
@@ -77,8 +77,8 @@ typedef ApiServerHttpResponseParser = Future<void> Function(BaseResponse respons
 /// ```
 @immutable
 class ApiServerHttp extends ApiServer{
-  final ApiServerHttpRequestBuilder _requestBuilder;
-  final ApiServerHttpResponseParser _responseParser;
+  final ApiServerHttpRequestBuilder? _requestBuilder;
+  final ApiServerHttpResponseParser? _responseParser;
 
   final HttpClient _client = HttpClient();
 
@@ -94,14 +94,14 @@ class ApiServerHttp extends ApiServer{
   /// In [responseParser], specify the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
   ApiServerHttp(
     {
-      @required String name,
-      @required String host,
-      int port,
+      required String name,
+      required String host,
+      int? port,
       String scheme = "http",
-      ApiServerHttpClientBuilder builder,
-      ApiServerUriBuilder uriBuilder,
-      ApiServerHttpRequestBuilder requestBuilder,
-      ApiServerHttpResponseParser responseParser
+      ApiServerHttpClientBuilder? builder,
+      ApiServerUriBuilder? uriBuilder,
+      ApiServerHttpRequestBuilder? requestBuilder,
+      ApiServerHttpResponseParser? responseParser
     }
   ): _requestBuilder = requestBuilder,
      _responseParser = responseParser,
@@ -114,10 +114,10 @@ class ApiServerHttp extends ApiServer{
   HttpClient get client => _client;
 
   /// The process of building HttpClientRequest, an HTTP request to the server.
-  ApiServerHttpRequestBuilder get requestBuilder => _requestBuilder;
+  ApiServerHttpRequestBuilder? get requestBuilder => _requestBuilder;
 
   /// the parsing process from HttpClientResponse, an HTTP response from the server, to the output DTO.
-  ApiServerHttpResponseParser get responseParser => _responseParser;
+  ApiServerHttpResponseParser? get responseParser => _responseParser;
 
   /// Close server.
   @override
@@ -129,12 +129,12 @@ class HttpClient extends BaseClient {
 
   final Client _inner = Client();
   final CookieJar cookieJar = CookieJar();
-  Duration requestTimeout;
+  Duration? requestTimeout;
 
   @override
   Future<StreamedResponse> send(BaseRequest request) async {
 
-    final cookies = cookieJar.loadForRequest(request.url);
+    final cookies = await cookieJar.loadForRequest(request.url);
     _removeExpiredCookies(cookies);
 
     String cookie = _getCookies(cookies);
@@ -142,11 +142,11 @@ class HttpClient extends BaseClient {
       request.headers[HttpHeaders.cookieHeader] = cookie;
     }
 
-    final response = await (requestTimeout == null ? _inner.send(request) : _inner.send(request).timeout(requestTimeout));
+    final response = await (requestTimeout == null ? _inner.send(request) : _inner.send(request).timeout(requestTimeout!));
 
-    if (response != null && response.headers != null) {
-      final cookieHeader = response.headers[HttpHeaders.setCookieHeader];
-      _saveCookies(response.request.url, cookieHeader);
+    final String? cookieHeader = response.headers[HttpHeaders.setCookieHeader];
+    if(response.request != null  && response.request?.url != null && cookieHeader != null){
+      _saveCookies(response.request!.url, cookieHeader);
     }
 
     return response;
@@ -155,7 +155,7 @@ class HttpClient extends BaseClient {
   void _removeExpiredCookies(List<Cookie> cookies) {
     cookies.removeWhere((cookie) {
       if (cookie.expires != null) {
-        return cookie.expires.isBefore(DateTime.now());
+        return cookie.expires!.isBefore(DateTime.now());
       }
       return false;
     });
@@ -165,7 +165,7 @@ class HttpClient extends BaseClient {
     return cookies.map((cookie) => "${cookie.name}=${cookie.value}").join('; ');
   }
 
-  void _saveCookies(Uri uri, String cookieHeader) {
+  void _saveCookies(Uri uri, String? cookieHeader) {
     if (cookieHeader == null || cookieHeader.isEmpty) {
       return;
     }

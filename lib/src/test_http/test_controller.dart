@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import '../../nimbus4flutter.dart';
 
 class TestControllerHttp extends TestController{
-  final ApiServerHttpClientBuilder _builder;
+  final ApiServerHttpClientBuilder? _builder;
 
   TestControllerHttp(
     {
@@ -13,7 +13,7 @@ class TestControllerHttp extends TestController{
       String host = "localhost",
       int port = 8080,
       String scheme = "http",
-      ApiServerHttpClientBuilder builder,
+      ApiServerHttpClientBuilder? builder,
     }
   ) : _builder = builder,
   super(apiServerName: apiServerName, host: host, port: port, scheme: scheme);
@@ -37,10 +37,9 @@ class TestControllerHttp extends TestController{
           return Uri(scheme: scheme, host:host, port:port, path: path);
         }
       },
-      requestBuilder: (request, method, input) {
+      requestBuilder: (request, method, input) async {
         request.headers['Accept-Encoding'] = 'gzip';
         request.headers['Accept'] = 'application/json';
-        return;
       },
       responseParser: (response, method, output) async {
         if(response.statusCode != 200){

@@ -12,11 +12,11 @@ void main() {
       );
       expect(recordSchema.fields[0].name, 'fieldName1');
       expect(recordSchema.fields[1].name, 'fieldName2');
-      expect(recordSchema.fieldMap['fieldName1'].name, 'fieldName1');
-      expect(recordSchema.fieldMap['fieldName2'].name, 'fieldName2');
+      expect(recordSchema.fieldMap['fieldName1']!.name, 'fieldName1');
+      expect(recordSchema.fieldMap['fieldName2']!.name, 'fieldName2');
       expect(recordSchema.hasPrimary, true);
       expect(recordSchema.primaryFields.length, 1);
-      expect(recordSchema.primaryFields[0]?.name, 'fieldName1');
+      expect(recordSchema.primaryFields[0].name, 'fieldName1');
       expect(recordSchema.length, 2);
       expect(recordSchema.names.toList(), ['fieldName1','fieldName2']);
     });

@@ -32,7 +32,7 @@
 
 import 'package:nimbus4flutter/nimbus4flutter.dart';
 
-typedef ApiServerUriBuilder = Uri Function(String scheme, String host, int port, String path, HttpMethod method, Object input);
+typedef ApiServerUriBuilder = Uri Function(String scheme, String host, int? port, String path, HttpMethod method, Object? input);
 
 /// It contains information about the server with the API and its processing.
 @immutable
@@ -40,8 +40,8 @@ abstract class ApiServer{
   final String _name;
   final String _host;
   final String _scheme;
-  final int _port;
-  final ApiServerUriBuilder _uriBuilder;
+  final int? _port;
+  final ApiServerUriBuilder? _uriBuilder;
 
   /// Construct ApiServer
   /// 
@@ -52,11 +52,11 @@ abstract class ApiServer{
   /// In [uriBuilder], specify the process of building uri to request to the server.
   ApiServer(
     {
-      @required String name,
-      @required String host,
-      int port,
+      required String name,
+      required String host,
+      int? port,
       String scheme = "http",
-      ApiServerUriBuilder uriBuilder
+      ApiServerUriBuilder? uriBuilder
     }
   ):_name= name,
     _host = host,
@@ -71,13 +71,13 @@ abstract class ApiServer{
   String get host => _host;
   
   /// The port of the server.
-  int get port => _port;
+  int? get port => _port;
 
   /// The scheme of the uri.
   String get scheme => _scheme;
 
   /// The process of building path, an HTTP request to the server.
-  ApiServerUriBuilder get uriBuilder => _uriBuilder;
+  ApiServerUriBuilder? get uriBuilder => _uriBuilder;
 
   /// Close server.
   void close({bool force: false}){}

@@ -12,7 +12,7 @@ void main() {
         ApiServerHttp(
           name : "test",
           host : "localhost",
-          requestBuilder: (request, method, input) {
+          requestBuilder: (request, method, input) async{
             switch(method){
             case HttpMethod.POST:
             case HttpMethod.PATCH:
@@ -24,7 +24,6 @@ void main() {
             default:
               break;
             }
-            return;
           },
           responseParser: (response, method, output) async{
             if(response.statusCode != 200){
@@ -45,7 +44,7 @@ void main() {
   );
   group('api test', () {
     test('single api get test', () async{
-      String requestedUri;
+      String requestedUri = "";
       DataSet responseDs = DataSet("testResponse");
       responseDs.setHeaderSchema(
         RecordSchema(
@@ -60,8 +59,8 @@ void main() {
       httpServer.listen((HttpRequest request) {
           requestedUri = request.requestedUri.toString();
           DataSet ds = responseDs.clone(true);
-          ds.getHeader("User")["name"] = "hoge";
-          ds.getHeader("User")["age"] = 20;
+          ds.getHeader("User")!["name"] = "hoge";
+          ds.getHeader("User")!["age"] = 20;
           request.response.headers.contentType = new ContentType("application", "json", charset: "utf-8");
           request.response.write(JsonEncoder().convert(ds.toMap(toJsonType: true)));
           request.response.close();
@@ -75,11 +74,11 @@ void main() {
           outputCreator: (context) => responseDs.clone(true)
         )
       );
-      Api api = ApiRegistory.getApi("test/user");
-      DataSet response = await api.request(null, RequestContext());
+      Api? api = ApiRegistory.getApi("test/user");
+      DataSet response = await api!.request(null, RequestContext());
       expect(requestedUri, "http://localhost/user");
-      expect(response.getHeader("User")["name"], "hoge");
-      expect(response.getHeader("User")["age"], 20);
+      expect(response.getHeader("User")?["name"], "hoge");
+      expect(response.getHeader("User")?["age"], 20);
       httpServer.close(force: true);
     });
     test('single api get error on connected test', () async{
@@ -102,9 +101,9 @@ void main() {
           outputCreator: (context) => responseDs.clone(true),
         )
       );
-      Api api = ApiRegistory.getApi("test/user");
+      Api? api = ApiRegistory.getApi("test/user");
       try{
-        await api.request(null, RequestContext());
+        await api!.request(null, RequestContext());
         fail("exception can not catch");
       }catch(e){
         expect(e is SocketException, true);
@@ -134,17 +133,17 @@ void main() {
           },
         )
       );
-      Api api = ApiRegistory.getApi("test/user");
+      Api? api = ApiRegistory.getApi("test/user");
       try{
-        await api.request(null, RequestContext());
+        await api!.request(null, RequestContext());
         fail("exception can not catch");
       }catch(e){
-        expect(e.message, "test");
+        expect(e.toString(), "Exception: test");
       }
       httpServer.close(force: true);
     });
     test('single api get error on response test', () async{
-      String requestedUri;
+      String requestedUri = "";
       DataSet responseDs = DataSet("testResponse");
       responseDs.setHeaderSchema(
         RecordSchema(
@@ -170,19 +169,19 @@ void main() {
           outputCreator: (context) => responseDs.clone(true)
         )
       );
-      Api api = ApiRegistory.getApi("test/user");
+      Api? api = ApiRegistory.getApi("test/user");
       try{
-        await api.request(null, RequestContext());
+        await api!.request(null, RequestContext());
         fail("exception can not catch");
       }catch(e){
         expect(requestedUri, "http://localhost/user");
-        expect(e.message, "error status = 404");
+        expect(e.toString(), "Exception: error status = 404");
       }
       httpServer.close(force: true);
     });
     test('single api post test', () async{
-      String requestedUri;
-      DataSet requestedDataSet;
+      String requestedUri = "";
+      DataSet? requestedDataSet;
       DataSet requestDs = DataSet("testRequest");
       requestDs.setHeaderSchema(
         RecordSchema(
@@ -206,10 +205,10 @@ void main() {
       httpServer.listen((HttpRequest request) async{
           requestedUri = request.requestedUri.toString();
           requestedDataSet = requestDs.clone();
-          requestedDataSet.fromMap(JsonDecoder().convert(await Utf8Decoder().bind(request).join()));
+          requestedDataSet!.fromMap(JsonDecoder().convert(await Utf8Decoder().bind(request).join()));
           DataSet ds = responseDs.clone(true);
-          ds.getHeader("User")["name"] = requestedDataSet.getHeader("User")["name"];
-          ds.getHeader("User")["age"] = 20;
+          ds.getHeader("User")?["name"] = requestedDataSet!.getHeader("User")?["name"];
+          ds.getHeader("User")?["age"] = 20;
           request.response.headers.contentType = new ContentType("application", "json", charset: "utf-8");
           request.response.write(JsonEncoder().convert(ds.toMap(toJsonType: true)));
           request.response.close();
@@ -224,20 +223,20 @@ void main() {
           outputCreator: (context) => responseDs.clone(true)
         )
       );
-      Api api = ApiRegistory.getApi("test/user");
+      Api? api = ApiRegistory.getApi("test/user");
       RequestContext context = RequestContext();
-      DataSet request = api.getInput(context);
-      request.getHeader("User")["name"] = "hoge";
+      DataSet request = api!.getInput(context);
+      request.getHeader("User")?["name"] = "hoge";
       DataSet response = await api.request(request, context);
       expect(requestedUri, "http://localhost/user");
-      expect(requestedDataSet.getHeader("User")["name"], "hoge");
-      expect(response.getHeader("User")["name"], "hoge"); 
-      expect(response.getHeader("User")["age"], 20);
+      expect(requestedDataSet?.getHeader("User")?["name"], "hoge");
+      expect(response.getHeader("User")?["name"], "hoge"); 
+      expect(response.getHeader("User")?["age"], 20);
       httpServer.close(force: true);
     });
     test('sequencial api test', () async{
-      List<String> requestedUri = List();
-      List<DataSet> requestedDataSet = List();
+      List<String> requestedUri = [];
+      List<DataSet> requestedDataSet = [];
       DataSet requestDs = DataSet("testRequest");
       requestDs.setHeaderSchema(
         RecordSchema(
@@ -264,8 +263,8 @@ void main() {
           reqDs.fromMap(JsonDecoder().convert(await Utf8Decoder().bind(request).join()));
           requestedDataSet.add(reqDs);
           DataSet ds = responseDs.clone(true);
-          ds.getHeader("User")["name"] = reqDs.getHeader("User")["name"];
-          ds.getHeader("User")["age"] = 20;
+          ds.getHeader("User")?["name"] = reqDs.getHeader("User")?["name"];
+          ds.getHeader("User")?["age"] = 20;
           request.response.headers.contentType = new ContentType("application", "json", charset: "utf-8");
           request.response.write(JsonEncoder().convert(ds.toMap(toJsonType: true)));
           request.response.close();
@@ -289,7 +288,7 @@ void main() {
               path:"/user",
               inputCreator: (context){
                 DataSet ds = requestDs.clone(true);
-                ds.getHeader("User")["name"] = ((context.getOutput("test/user[0]") as DataSet).getHeader("User")["name"] as String) + "fuga";
+                ds.getHeader("User")?["name"] = ((context.getOutput("test/user[0]") as DataSet).getHeader("User")?["name"] as String) + "fuga";
                 return ds;
               },
               outputCreator: (context) => responseDs.clone(true)
@@ -301,7 +300,7 @@ void main() {
               path:"/user",
               inputCreator: (context){
                 DataSet ds = requestDs.clone(true);
-                ds.getHeader("User")["name"] = ((context.getOutput("test/user[1]") as DataSet).getHeader("User")["name"] as String) + "piyo";
+                ds.getHeader("User")?["name"] = ((context.getOutput("test/user[1]") as DataSet).getHeader("User")?["name"] as String) + "piyo";
                 return ds;
               },
               outputCreator: (context) => responseDs.clone(true)
@@ -309,31 +308,31 @@ void main() {
           ]
         )
       );
-      Api api = ApiRegistory.getApi("test/users");
+      Api? api = ApiRegistory.getApi("test/users");
       RequestContext context = RequestContext();
-      DataSet request = api.getInput(context);
-      request.getHeader("User")["name"] = "hoge";
-      List<DataSet> response = ((await api.request(request, context)) as List<Object>).cast();
+      DataSet request = api?.getInput(context);
+      request.getHeader("User")?["name"] = "hoge";
+      List<DataSet> response = ((await api?.request(request, context)) as List<Object>).cast();
       expect(requestedUri.length, 3);
       expect(requestedUri[0], "http://localhost/user");
       expect(requestedUri[1], "http://localhost/user");
       expect(requestedUri[2], "http://localhost/user");
       expect(requestedDataSet.length, 3);
-      expect(requestedDataSet[0].getHeader("User")["name"], "hoge");
-      expect(requestedDataSet[1].getHeader("User")["name"], "hogefuga");
-      expect(requestedDataSet[2].getHeader("User")["name"], "hogefugapiyo");
+      expect(requestedDataSet[0].getHeader("User")?["name"], "hoge");
+      expect(requestedDataSet[1].getHeader("User")?["name"], "hogefuga");
+      expect(requestedDataSet[2].getHeader("User")?["name"], "hogefugapiyo");
       expect(response.length, 3);
-      expect(response[0].getHeader("User")["name"], "hoge"); 
-      expect(response[0].getHeader("User")["age"], 20);
-      expect(response[1].getHeader("User")["name"], "hogefuga"); 
-      expect(response[1].getHeader("User")["age"], 20);
-      expect(response[2].getHeader("User")["name"], "hogefugapiyo"); 
-      expect(response[2].getHeader("User")["age"], 20);
+      expect(response[0].getHeader("User")?["name"], "hoge"); 
+      expect(response[0].getHeader("User")?["age"], 20);
+      expect(response[1].getHeader("User")?["name"], "hogefuga"); 
+      expect(response[1].getHeader("User")?["age"], 20);
+      expect(response[2].getHeader("User")?["name"], "hogefugapiyo"); 
+      expect(response[2].getHeader("User")?["age"], 20);
       httpServer.close(force: true);
     });
     test('parallel api test', () async{
-      List<String> requestedUri = List();
-      List<DataSet> requestedDataSet = List();
+      List<String> requestedUri = [];
+      List<DataSet> requestedDataSet = [];
       DataSet requestDs = DataSet("testRequest");
       requestDs.setHeaderSchema(
         RecordSchema(
@@ -360,8 +359,8 @@ void main() {
           reqDs.fromMap(JsonDecoder().convert(await Utf8Decoder().bind(request).join()));
           requestedDataSet.add(reqDs);
           DataSet ds = responseDs.clone(true);
-          ds.getHeader("User")["name"] = reqDs.getHeader("User")["name"];
-          ds.getHeader("User")["age"] = 20;
+          ds.getHeader("User")?["name"] = reqDs.getHeader("User")?["name"];
+          ds.getHeader("User")?["age"] = 20;
           request.response.headers.contentType = new ContentType("application", "json", charset: "utf-8");
           request.response.write(JsonEncoder().convert(ds.toMap(toJsonType: true)));
           request.response.close();
@@ -380,26 +379,26 @@ void main() {
           apis:[templateApi,templateApi,templateApi]
         )
       );
-      Api api = ApiRegistory.getApi("test/users");
+      Api? api = ApiRegistory.getApi("test/users");
       RequestContext context = RequestContext();
-      List<DataSet> request = (api.getInput(context) as List<Object>).cast();
-      request[0].getHeader("User")["name"] = "hoge";
-      request[1].getHeader("User")["name"] = "fuga";
-      request[2].getHeader("User")["name"] = "piyo";
-      List<DataSet> response = ((await api.request(request, context)) as List<Object>).cast();
+      List<DataSet> request = (api?.getInput(context) as List<Object>).cast();
+      request[0].getHeader("User")?["name"] = "hoge";
+      request[1].getHeader("User")?["name"] = "fuga";
+      request[2].getHeader("User")?["name"] = "piyo";
+      List<DataSet> response = ((await api?.request(request, context)) as List<Object>).cast();
       expect(requestedUri.length, 3);
       expect(requestedUri[0], "http://localhost/user");
       expect(requestedUri[1], "http://localhost/user");
       expect(requestedUri[2], "http://localhost/user");
       expect(requestedDataSet.length, 3);
-      expect(requestedDataSet.map((e) => e.getHeader("User")["name"]).toSet().containsAll(["hoge", "fuga", "piyo"]), true);
+      expect(requestedDataSet.map((e) => e.getHeader("User")?["name"]).toSet().containsAll(["hoge", "fuga", "piyo"]), true);
       expect(response.length, 3);
-      expect(response[0].getHeader("User")["name"], "hoge"); 
-      expect(response[0].getHeader("User")["age"], 20);
-      expect(response[1].getHeader("User")["name"], "fuga"); 
-      expect(response[1].getHeader("User")["age"], 20);
-      expect(response[2].getHeader("User")["name"], "piyo"); 
-      expect(response[2].getHeader("User")["age"], 20);
+      expect(response[0].getHeader("User")?["name"], "hoge"); 
+      expect(response[0].getHeader("User")?["age"], 20);
+      expect(response[1].getHeader("User")?["name"], "fuga"); 
+      expect(response[1].getHeader("User")?["age"], 20);
+      expect(response[2].getHeader("User")?["name"], "piyo"); 
+      expect(response[2].getHeader("User")?["age"], 20);
       httpServer.close(force: true);
     });
   });
