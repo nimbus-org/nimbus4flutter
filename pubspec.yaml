@@ -1,6 +1,6 @@
 name: nimbus4flutter
 description: This is a library for developing Flutter applications that communicate with a web server built using [Project Nimbus](https://github.com/nimbus-org/nimbus).
-version: 0.0.1-nullsafety.0
+version: 0.0.1-nullsafety.1
 
 homepage: https://github.com/nimbus-org/nimbus4flutter
 

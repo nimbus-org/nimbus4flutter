@@ -216,7 +216,7 @@ class SequencialApi<I,O> extends Api<I,O>{
     }
     Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
     context.setOutput(name, output);
-    return output as O;
+    return output == null ? null : output as O;
  }
 }
 
@@ -304,6 +304,6 @@ class ParallelApi<O> extends Api<List<Object>,O>{
     context.setOutput(name, outputs);
     Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
     context.setOutput(name, output);
-    return output as O;
+    return output == null ? null : output as O;
  }
 }

@@ -440,10 +440,10 @@ class RecordList implements List<Record>{
 
   @override
   bool remove(Object? value) {
-    if(value != null && !(value is Record)){
+    if(value == null || !(value is Record)){
       return false;
     }
-    Record record = value as Record;
+    Record record = value;
     if(record.schema != _schema){
       return false;
     }

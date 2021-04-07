@@ -271,8 +271,10 @@ class FieldSchema<T>{
 
   /// Converts the specified object suitable for the type of this field to an output that matches the specified generic type.
   F? formatValue<F>(DataSet? ds,  Record rec, T? value){
-     if(_outputConverter == null){
-       if(value == null || value is F){
+    if(_outputConverter == null){
+      if(value == null){
+        return null;
+      }else if(value is F){
         return value as F;
       }else{
         if(F == String){

@@ -485,10 +485,12 @@ class Record{
         if(!hasNull && value == null){
           continue;
         }
-        if(field.isRecord){
-          value = (value as Record).toMap(hasNull : hasNull, toJsonType:toJsonType);
-        }else if(field.isRecordList){
-          value = (value as RecordList).toMap(hasNull : hasNull, toJsonType:toJsonType);
+        if(value != null){
+          if(field.isRecord){
+            value = (value as Record).toMap(hasNull : hasNull, toJsonType:toJsonType);
+          }else if(field.isRecordList){
+            value = (value as RecordList).toMap(hasNull : hasNull, toJsonType:toJsonType);
+          }
         }
         map[field.name] = value;
       }
@@ -500,18 +502,18 @@ class Record{
   /// Copies the value of the specified List to this record.
   /// 
   /// If there is no guarantee that the schema of the List matches the schema of this record, specify the schema map of this record in [recordSchemaMap], and the schema map of the entire [DataSet] in [schemaMap] if there is a nested [Record] or [RecordList].
-  Record fromList(List<dynamic>? list,[Map<String,dynamic?>? recordSchemaMap, Map<String,dynamic>? schemaMap]){
+  Record fromList(List<dynamic?>? list,[Map<String,dynamic?>? recordSchemaMap, Map<String,dynamic>? schemaMap]){
     if(list == null || _schema == null){
       return this;
     }
     if(recordSchemaMap == null){
       for(int i = 0; i < min(list.length, _schema!.length); i++){
         FieldSchema field = _schema!.fields[i];
-        Object value = list[i];
+        Object? value = list[i];
         if(field.isView){
           continue;
         }
-        if(_dataSet != null && field.schema != null){
+        if(_dataSet != null && field.schema != null && value != null){
           if(field.isRecord){
             value = _dataSet!.createNestedRecord(field.schema!).fromList(value as List<dynamic?>);
           }else if(field.isRecordList){
@@ -533,7 +535,7 @@ class Record{
           continue;
         }
         Object? value = list[fieldSchemaMap["index"]];
-        if(_dataSet != null && field.schema != null){
+        if(_dataSet != null && field.schema != null && value != null){
           if(field.isRecord){
             value = _dataSet!.createNestedRecord(field.schema!).fromList(
               value as List<dynamic>,

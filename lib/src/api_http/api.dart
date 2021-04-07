@@ -216,12 +216,12 @@ class ApiHttp<I,O,Q extends BaseRequest,S extends BaseResponse> extends Api<I,O>
             response as S,
             output,
             (response, output) {
-              return server.responseParser ?? server.responseParser!(response, _method, output as Object)
+              return server.responseParser ?? server.responseParser!(response, _method, output == null ? null : output as Object)
                 .catchError((e) => (e) => context.exception = e);
             }
           );
         }else if(server.responseParser != null){
-          await server.responseParser!(response, _method, output as Object);
+          await server.responseParser!(response, _method, output == null ? null : output as Object);
         }
       }catch(e){
         context.exception = e;

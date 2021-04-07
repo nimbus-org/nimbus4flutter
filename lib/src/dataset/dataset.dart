@@ -229,13 +229,16 @@ class DataSet{
     if(name == null){
       name = dsEntry.key;
     }
-    Map<String?,Object?> dsMap = dsEntry.value;
+    Map<String?,Object?>? dsMap = dsEntry.value;
+    if(dsMap == null){
+      return this;
+    }
     Map<String?,Object?>? headers = dsMap["header"] as Map<String?,Object?>?;
     if(headers != null){
       headers.forEach(
         (name, value){
           Record? header = _headers[name?.length == 0 ? null : name];
-          if(header != null){
+          if(header != null && value != null){
             header.fromMap(value as Map<String,Object?>);
           }
         }
@@ -246,7 +249,7 @@ class DataSet{
       recordLists.forEach(
         (name, value){
           RecordList? list = _recordLists[name?.length == 0 ? null : name];
-          if(list != null){
+          if(list != null && value != null){
             if(value is List){
               list.fromMap(value);
             }else if(value is Map){

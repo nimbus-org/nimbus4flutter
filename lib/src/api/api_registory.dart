@@ -128,7 +128,8 @@ class ApiRegistory{
   
   /// Get [Api] with the specified name
   static Api<I,O>? getApi<I, O>(String name){
-    return apiRegistory[name] as Api<I,O>;
+    Api<dynamic?,dynamic?>? api = apiRegistory[name]; 
+    return api == null ? null : api as Api<I,O>;
   }
 
   /// Close repository.
