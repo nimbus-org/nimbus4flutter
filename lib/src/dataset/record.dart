@@ -581,7 +581,7 @@ class Record{
   }
   
   @override
-  bool operator ==(dynamic other){
+  bool operator ==(Object other){
     if(!(other is Record)
       || (_schema == null && other._schema != null)
       || (_schema != null && other._schema == null)
@@ -665,7 +665,7 @@ class _RecordPrimaryKey{
   const _RecordPrimaryKey(this._schema, this._values);
 
   @override
-  bool operator ==(dynamic other){
+  bool operator ==(Object other){
     if(!(other is _RecordPrimaryKey)){
       return false;
     }
