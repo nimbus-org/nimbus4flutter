@@ -133,7 +133,7 @@ class ApiHttp<I,O,Q extends BaseRequest,S extends BaseResponse> extends Api<I,O>
     ApiServerHttp server = ApiRegistory.getApiServer(_serverName) as ApiServerHttp;
     Uri uri;
     if(_uriBuilder != null){
-      uri = _uriBuilder!(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input));
+      uri = _uriBuilder!(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder?.call(server.scheme, server.host, server.port, _path, _method, input));
     }else if(server.uriBuilder != null){
       uri = server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input);
     }else{
@@ -182,7 +182,7 @@ class ApiHttp<I,O,Q extends BaseRequest,S extends BaseResponse> extends Api<I,O>
       break;
     }
     if(_requestBuilder != null){
-      await _requestBuilder!(req as Q, input, (request, input) => server.requestBuilder ?? server.requestBuilder!(request, _method, input));
+      await _requestBuilder!(req as Q, input, (request, input) => server.requestBuilder?.call(request, _method, input));
     }else if(server.requestBuilder != null){
       await server.requestBuilder!(req, _method, input);
     }
@@ -216,7 +216,7 @@ class ApiHttp<I,O,Q extends BaseRequest,S extends BaseResponse> extends Api<I,O>
             response as S,
             output,
             (response, output) {
-              return server.responseParser ?? server.responseParser!(response, _method, output == null ? null : output as Object)
+              return server.responseParser?.call(response, _method, output == null ? null : output as Object)
                 .catchError((e) => (e) => context.exception = e);
             }
           );
@@ -226,7 +226,9 @@ class ApiHttp<I,O,Q extends BaseRequest,S extends BaseResponse> extends Api<I,O>
       }catch(e){
         context.exception = e;
       }
-      context.setOutput(name, output);
+      if(output != null) {
+        context.setOutput(name, output);
+      }
       return output;
     }).catchError(
       (e) => context.exception = e

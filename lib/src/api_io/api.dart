@@ -133,7 +133,7 @@ class ApiIO<I,O> extends Api<I,O>{
     ApiServerIO server = ApiRegistory.getApiServer(_serverName) as ApiServerIO;
     Uri uri;
     if(_uriBuilder != null){
-      uri = _uriBuilder!(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder ?? server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input));
+      uri = _uriBuilder!(server.scheme, server.host, server.port, _path, input, context, (scheme, host, port, path, input) => server.uriBuilder?.call(server.scheme, server.host, server.port, _path, _method, input));
     }else if(server.uriBuilder != null){
       uri = server.uriBuilder!(server.scheme, server.host, server.port, _path, _method, input);
     }else{
@@ -166,7 +166,7 @@ class ApiIO<I,O> extends Api<I,O>{
     }
     Future<HttpClientResponse> resp = req.then((HttpClientRequest request){
       if(_requestBuilder != null){
-        _requestBuilder!(request, input, (request, input) => server.requestBuilder ?? server.requestBuilder!(request, _method, input));
+        _requestBuilder!(request, input, (request, input) => server.requestBuilder?.call(request, _method, input));
       }else if(server.requestBuilder != null){
         server.requestBuilder!(request, _method, input);
       }
@@ -183,7 +183,7 @@ class ApiIO<I,O> extends Api<I,O>{
             response,
             output,
             (response, output) {
-              return server.responseParser ?? server.responseParser!(response, _method, output)
+              return server.responseParser?.call(response, _method, output)
                 .catchError((e) => (e) => context.exception = e);
             }
           );
@@ -194,7 +194,9 @@ class ApiIO<I,O> extends Api<I,O>{
       }catch(e){
         context.exception = e;
       }
-      context.setOutput(name, output);
+      if(output != null){
+        context.setOutput(name, output);
+      }
       return output;
     }).catchError(
       (e) => context.exception = e
