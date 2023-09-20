@@ -48,8 +48,8 @@ class RequestContext{
   }
 
   /// Set the input DTO of a specified API name.
-  void setInput(String api, Object? input){
-    _inputs[api] = input!;  
+  void setInput(String api, Object input){
+    _inputs[api] = input;  
   }
 
   /// Get the output DTO of a specified API name.
@@ -58,8 +58,8 @@ class RequestContext{
   }
 
   /// Set the output DTO of a specified API name.
-  void setOutput(String api, Object? output){
-    _outputs[api] = output!;  
+  void setOutput(String api, Object output){
+    _outputs[api] = output;  
   }
 
   /// Get attribute of a specified name.
@@ -205,7 +205,9 @@ class SequencialApi<I,O> extends Api<I,O>{
 
   @override
   Future<O?> request(I? input, RequestContext context) async{
-    context.setInput(name, input);
+    if(input != null){
+      context.setInput(name, input);
+    }
     Object? inp = input;
     List<Object> outputs = [];
     for(int i = 0; i < _apis.length; i++){
@@ -215,7 +217,9 @@ class SequencialApi<I,O> extends Api<I,O>{
       outputs.add(await _apis[i].request(inp, context));
     }
     Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
-    context.setOutput(name, output);
+    if(output != null){
+      context.setOutput(name, output);
+    }
     return output == null ? null : output as O;
  }
 }
@@ -291,7 +295,9 @@ class ParallelApi<O> extends Api<List<Object>,O>{
 
   @override
   Future<O?> request(List<Object>? input, RequestContext context) async{
-    context.setInput(name, input);
+    if(input != null){
+      context.setInput(name, input);
+    }
     List<Future<dynamic>> outputFutures = [];
     for(int i = 0; i < _apis.length; i++){
       outputFutures.add(_apis[i].request(input == null ? null : input[i], context));
@@ -303,7 +309,9 @@ class ParallelApi<O> extends Api<List<Object>,O>{
     }
     context.setOutput(name, outputs);
     Object? output = _outputCreator == null ? outputs : _outputCreator!(context);
-    context.setOutput(name, output);
+    if(output != null){
+      context.setOutput(name, output);
+    }
     return output == null ? null : output as O;
  }
 }
