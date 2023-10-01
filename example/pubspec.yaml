@@ -1,0 +1,19 @@
+name: example
+description: A project used to demo the Todo Reporter
+version: 1.0.0+2
+
+environment:
+  sdk: '>=3.0.1 <4.0.0'
+
+dependencies:
+  http: ^1.1.0
+  nimbus4flutter: 
+    path: ../
+  nimbus_annotation: ^1.0.0+1
+
+dev_dependencies:
+  build_runner: ^2.4.6
+  nimbus_generator: ^1.0.0
+
+dependency_overrides:
+  http: ">=0.13.1"

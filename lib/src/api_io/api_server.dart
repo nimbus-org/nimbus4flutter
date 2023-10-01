@@ -121,6 +121,6 @@ class ApiServerIO extends ApiServer{
 
   /// Close server.
   @override
-  void close({bool force: false}) => _client.close(force:force);
+  void close({bool force = false}) => _client.close(force:force);
 
 }

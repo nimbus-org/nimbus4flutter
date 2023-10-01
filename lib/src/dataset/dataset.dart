@@ -359,7 +359,7 @@ class DataSet{
   ///    }
   ///  }
   /// ```
-  DataSet fromList(Map<String,dynamic>? map,{bool isListHeader:true, bool isListRecordList:true}){
+  DataSet fromList(Map<String,dynamic>? map,{bool isListHeader=true, bool isListRecordList=true}){
     if(map == null){
       return this;
     }
@@ -418,8 +418,8 @@ class DataSet{
       bool hasNull=true,
       bool isOutputSchema=false,
       bool toJsonType=false,
-      bool isListHeader:true,
-      bool isListRecordList:true
+      bool isListHeader=true,
+      bool isListRecordList=true
     }
   ){
     Map map = Map<String,Object>();

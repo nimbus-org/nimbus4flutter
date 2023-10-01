@@ -1,0 +1,21 @@
+name: nimbus_generator
+description: nimbus_generator is a type conversion [Nimbus](https://github.com/nimbus-org/nimbus4flutter) client generator using [source_gen](https://github.com/dart-lang/source_gen) and inspired by [Chopper](https://github.com/lejard-h/chopper) and [Retrofit](https://github.com/square/retrofit).
+version: 1.0.0
+repository: https://github.com/nimbus-org/nimbus4flutter
+
+environment:
+  sdk: '>=3.0.1 <4.0.0'
+
+dependencies:
+  recase: ^4.1.0
+  analyzer: ^6.2.0
+  build: ^2.4.1
+  build_config: ^1.1.1
+  code_builder: ^4.6.0
+  dart_style: ^2.3.3 
+  source_gen: ^1.4.0
+  source_helper: ^1.3.4
+  nimbus_annotation: ^1.0.0
+  
+dev_dependencies:
+  test: ^1.6.0

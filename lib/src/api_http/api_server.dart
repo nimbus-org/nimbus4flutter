@@ -121,7 +121,7 @@ class ApiServerHttp extends ApiServer{
 
   /// Close server.
   @override
-  void close({bool force: false}) => _client.close();
+  void close({bool force = false}) => _client.close();
 
 }
 

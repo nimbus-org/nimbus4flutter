@@ -133,7 +133,7 @@ class ApiRegistory{
   }
 
   /// Close repository.
-  static void close({bool force: false}){
+  static void close({bool force = false}){
     apiServerRegistory.values.forEach((server) {server.close(force:force);});
     apiRegistory.clear();
     apiServerRegistory.clear();

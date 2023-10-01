@@ -80,6 +80,6 @@ abstract class ApiServer{
   ApiServerUriBuilder? get uriBuilder => _uriBuilder;
 
   /// Close server.
-  void close({bool force: false}){}
+  void close({bool force = false}){}
 
 }
