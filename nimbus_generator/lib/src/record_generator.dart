@@ -44,7 +44,8 @@ class RecordSupporterGenerator
     ].join('\n\n'));
   }
 
-  Class _implementRecord(ClassElement element, ConstantReader? annotation, Iterable<FieldElement>? fields) {
+  Class _implementRecord(ClassElement element, ConstantReader? annotation,
+      Iterable<FieldElement>? fields) {
     fieldRename = annotation?.toRecord().fieldRename ?? FieldRename.none;
 
     return Class((c) {

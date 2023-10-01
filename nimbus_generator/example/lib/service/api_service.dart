@@ -8,7 +8,7 @@ import 'package:nimbus_annotation/nimbus_annotation.dart';
 
 part 'api_service.g.dart';
 
-@NimbusApi() 
+@NimbusApi()
 abstract class ApiService {
   factory ApiService({
     required String baseUrl,

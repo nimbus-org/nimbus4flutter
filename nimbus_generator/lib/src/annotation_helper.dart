@@ -19,6 +19,8 @@ T enumValueForDartObject<T>(
     items[source.getField('index')!.toIntValue()!];
 
 extension ConstantReaderExt on ConstantReader {
+  /// Return an instance of [DatasetSerializable] corresponding to a the provided
+  /// [reader].
   DatasetSerializable toDataSet() {
     return DatasetSerializable(
       name: this.read('name').literalValue as String,
@@ -27,6 +29,8 @@ extension ConstantReaderExt on ConstantReader {
     );
   }
 
+  /// Return an instance of [RecordSerializable] corresponding to a the provided
+  /// [reader].
   RecordSerializable toRecord() {
     return RecordSerializable(
       fieldRename: readEnum(this.read('fieldRename'), FieldRename.values) ??

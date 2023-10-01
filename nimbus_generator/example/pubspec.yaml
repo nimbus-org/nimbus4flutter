@@ -7,8 +7,7 @@ environment:
 
 dependencies:
   http: ^1.1.0
-  nimbus4flutter: 
-    path: ../
+  nimbus4flutter: ^0.0.2
   nimbus_annotation: ^1.0.0+1
 
 dev_dependencies:

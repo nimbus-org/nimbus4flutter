@@ -1,0 +1,12 @@
+name: example
+description: A project used to demo the Nimbus annotation
+version: 1.0.0+2
+
+environment:
+  sdk: '>=3.0.1 <4.0.0'
+
+dependencies:
+  nimbus_annotation: ^1.0.0+1
+
+dependency_overrides:
+  http: ">=0.13.1"

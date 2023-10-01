@@ -161,8 +161,10 @@ class DatasetSupporterGenerator
           blocks.add(Code(" ds.setRecordList($fieldRecordName, '$name');"));
         }
       } else if (isInheritedField) {
-              final type = element.type.coreIterableGenericType().getDisplayString(withNullability: false);
-      final name = element.displayName;
+        final type = element.type
+            .coreIterableGenericType()
+            .getDisplayString(withNullability: false);
+        final name = element.displayName;
         blocks.add(Code('ds.setRecordList('));
         blocks.add(Code(
             'RecordList($type.schema!).fromMap(instance.$name?.map((e) => e.toJson()).toList()),'));
