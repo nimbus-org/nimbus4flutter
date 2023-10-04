@@ -1,7 +1,7 @@
 name: nimbus_annotation
 description: nimbus_annotation is a annotation for flutter_generator inspired by Chopper and Retrofit
 repository: https://github.com/nimbus-org/nimbus4flutter/
-version: 1.0.0+2
+version: 1.0.0+4
 
 environment:
   sdk: '>=3.0.1 <4.0.0'

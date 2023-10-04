@@ -1,4 +1,4 @@
-/// Values for the automatic field renaming behavior for [DatasetSerializable] and [RecordSerializable].
+/// Values for the automatic field renaming behavior for [DatasetSerializable] and [SchemaSerializable].
 enum FieldRename {
   /// Use the field name without changes.
   none,
@@ -28,8 +28,8 @@ class DatasetRecordList {
   const DatasetRecordList();
 }
 
-class RecordSerializable {
-  const RecordSerializable({this.fieldRename = FieldRename.snake});
+class SchemaSerializable {
+  const SchemaSerializable({this.fieldRename = FieldRename.snake});
 
   final FieldRename fieldRename;
 }

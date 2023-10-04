@@ -25,19 +25,19 @@ class LoginResponseModel {
   Map<String, dynamic> toJson() => _$LoginResponseModelToJson(this);
 
   @DatasetHeader()
-  final LoginResponseRecord? login;
+  final LoginResponseSchema? login;
 }
 
-@RecordSerializable()
-class LoginResponseRecord {
-  LoginResponseRecord({this.userId, this.sessionId});
+@SchemaSerializable()
+class LoginResponseSchema {
+  LoginResponseSchema({this.userId, this.sessionId});
 
-  factory LoginResponseRecord.fromJson(Map<String, dynamic> json) =>
-      _$LoginResponseRecordFromJson(json);
+  factory LoginResponseSchema.fromJson(Map<String, dynamic> json) =>
+      _$LoginResponseSchemaFromJson(json);
 
-  static RecordSchema? get schema => _$LoginResponseRecordSchema();
+  static RecordSchema? get schema => _$LoginResponseSchema();
 
-  Map<String, dynamic> toJson() => _$LoginResponseRecordToJson(this);
+  Map<String, dynamic> toJson() => _$LoginResponseSchemaToJson(this);
 
   final String? userId;
   final String? sessionId;

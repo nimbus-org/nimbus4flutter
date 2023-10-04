@@ -13,19 +13,19 @@ class ApiResponseModel {
   Map<String, dynamic> toJson() => _$ApiResponseModelToJson(this);
 
   @DatasetHeader()
-  final CommonRecord? common;
+  final CommonSchema? common;
 }
 
-@RecordSerializable()
-class CommonRecord {
-  CommonRecord({this.resultCode, this.resultMessage});
+@SchemaSerializable()
+class CommonSchema {
+  CommonSchema({this.resultCode, this.resultMessage});
 
-  factory CommonRecord.fromJson(Map<String, dynamic> json) =>
-      _$CommonRecordFromJson(json);
+  factory CommonSchema.fromJson(Map<String, dynamic> json) =>
+      _$CommonSchemaFromJson(json);
 
-  static RecordSchema? get schema => _$CommonRecordSchema();
+  static RecordSchema? get schema => _$CommonSchema();
 
-  Map<String, dynamic> toJson() => _$CommonRecordToJson(this);
+  Map<String, dynamic> toJson() => _$CommonSchemaToJson(this);
 
   final String? resultCode;
   final String? resultMessage;

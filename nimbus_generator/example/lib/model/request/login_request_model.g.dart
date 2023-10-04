@@ -16,20 +16,20 @@ class _LoginRequestRecord extends Record {
         );
 }
 
-LoginRequestRecord _$LoginRequestRecordFromJson(Map<String, dynamic> json) {
+LoginRequestSchema _$LoginRequestSchemaFromJson(Map<String, dynamic> json) {
   final ds = _LoginRequestRecord();
   ds.fromMap(json);
-  return LoginRequestRecord(
+  return LoginRequestSchema(
     mailAddress: json['mail_address'],
     password: json['password'],
   );
 }
 
-RecordSchema? _$LoginRequestRecordSchema() {
+RecordSchema? _$LoginRequestSchema() {
   return _LoginRequestRecord().schema;
 }
 
-Map<String, dynamic> _$LoginRequestRecordToJson(LoginRequestRecord instance) {
+Map<String, dynamic> _$LoginRequestSchemaToJson(LoginRequestSchema instance) {
   final ds = _LoginRequestRecord();
   ds.setByName('mail_address', instance.mailAddress);
   ds.setByName('password', instance.password);
@@ -43,7 +43,7 @@ Map<String, dynamic> _$LoginRequestRecordToJson(LoginRequestRecord instance) {
 class _DataSet extends DataSet {
   _DataSet() : super('') {
     setHeaderSchema(_LoginRequestRecord().schema!, 'Login');
-    setRecordListSchema(HeaderQueryRecord.schema!, 'HeaderQuery');
+    setRecordListSchema(HeaderQuerySchema.schema!, 'HeaderQuery');
   }
 }
 
@@ -51,7 +51,7 @@ LoginRequestModel _$LoginRequestModelFromJson(Map<String, dynamic> json) {
   final ds = _DataSet();
   ds.fromList(json);
   return LoginRequestModel(
-    login: LoginRequestRecord.fromJson(
+    login: LoginRequestSchema.fromJson(
       ds.getHeader('Login')?.toMap() ?? {},
     ),
   );
@@ -63,7 +63,7 @@ Map<String, dynamic> _$LoginRequestModelToJson(LoginRequestModel instance) {
   loginRecord.fromMap(instance.login?.toJson());
   ds.setHeader(loginRecord, 'Login');
   ds.setRecordList(
-    RecordList(HeaderQueryRecord.schema!)
+    RecordList(HeaderQuerySchema.schema!)
         .fromMap(instance.headerQuery?.map((e) => e.toJson()).toList()),
     'HeaderQuery',
   );

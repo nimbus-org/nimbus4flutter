@@ -16,20 +16,20 @@ class _CommonRecord extends Record {
         );
 }
 
-CommonRecord _$CommonRecordFromJson(Map<String, dynamic> json) {
+CommonSchema _$CommonSchemaFromJson(Map<String, dynamic> json) {
   final ds = _CommonRecord();
   ds.fromMap(json);
-  return CommonRecord(
+  return CommonSchema(
     resultCode: json['result_code'],
     resultMessage: json['result_message'],
   );
 }
 
-RecordSchema? _$CommonRecordSchema() {
+RecordSchema? _$CommonSchema() {
   return _CommonRecord().schema;
 }
 
-Map<String, dynamic> _$CommonRecordToJson(CommonRecord instance) {
+Map<String, dynamic> _$CommonSchemaToJson(CommonSchema instance) {
   final ds = _CommonRecord();
   ds.setByName('result_code', instance.resultCode);
   ds.setByName('result_message', instance.resultMessage);
@@ -50,7 +50,7 @@ ApiResponseModel _$ApiResponseModelFromJson(Map<String, dynamic> json) {
   final ds = _DataSet();
   ds.fromList(json);
   return ApiResponseModel(
-    common: CommonRecord.fromJson(
+    common: CommonSchema.fromJson(
       ds.getHeader('Common')?.toMap() ?? {},
     ),
   );

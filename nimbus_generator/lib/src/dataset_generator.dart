@@ -64,7 +64,7 @@ class DatasetSupporterGenerator
 
       final blocks = <Code>[];
       headers?.forEach((element) {
-        final type = element.type.getDisplayString(withNullability: false);
+        final type = element.type.getDisplayString(withNullability: false).replaceAll("Schema", "Record");
         final name = element.displayName.pascalCase;
         blocks.add(Code("setHeaderSchema(_$type().schema!, '$name');"));
       });
@@ -77,7 +77,7 @@ class DatasetSupporterGenerator
               Code("setRecordListSchema(RecordSchema(const []), '$name');"));
         } else {
           blocks.add(Code(
-              "setRecordListSchema(_${type.getDisplayString(withNullability: false)}().schema!, '$name');"));
+              "setRecordListSchema(_${type.getDisplayString(withNullability: false).replaceAll("Schema", "Record")}().schema!, '$name');"));
         }
       });
 
@@ -107,7 +107,7 @@ class DatasetSupporterGenerator
         if (e.type.coreIterableGenericType().isLikeDynamic) {
           return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => e).toList()";
         } else {
-          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => ${name}Record.fromJson(e)).toList()";
+          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => ${name}Schema.fromJson(e)).toList()";
         }
       } else {
         return "${e.displayName}: $type.fromJson(ds.getHeader('$name')?.toMap() ?? {},)";
@@ -140,7 +140,7 @@ class DatasetSupporterGenerator
       final fieldRecordName = '${element.displayName}Record';
       final isInheritedField = element.getter?.hasOverride ?? false;
       if (isHeader) {
-        final type = element.type.getDisplayString(withNullability: false);
+        final type = element.type.getDisplayString(withNullability: false).replaceAll("Schema", "Record");
 
         blocks.add(declareFinal(fieldRecordName)
             .assign(refer('_$type').call([]))
@@ -154,7 +154,7 @@ class DatasetSupporterGenerator
         if (!type.isLikeDynamic) {
           blocks.add(declareFinal(fieldRecordName)
               .assign(refer(
-                  'RecordList(_${type.getDisplayString(withNullability: false)}().schema!)'))
+                  'RecordList(_${type.getDisplayString(withNullability: false).replaceAll("Schema", "Record")}().schema!)'))
               .statement);
           blocks.add(Code(
               "$fieldRecordName.fromMap(instance.headerQuery?.map((e) => e.toJson()).toList());"));

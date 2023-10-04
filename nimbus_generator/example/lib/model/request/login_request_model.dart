@@ -12,12 +12,12 @@ class LoginRequestModel extends ApiRequestModel {
   factory LoginRequestModel.fromJson(Map<String, dynamic> json) =>
       _$LoginRequestModelFromJson(json);
   @DatasetHeader()
-  final LoginRequestRecord? login;
+  final LoginRequestSchema? login;
 
   @override
-  List<HeaderQueryRecord>? get headerQuery => [
-        HeaderQueryRecord(name: 'Common'),
-        HeaderQueryRecord(
+  List<HeaderQuerySchema>? get headerQuery => [
+        HeaderQuerySchema(name: 'Common'),
+        HeaderQuerySchema(
           name: 'Login',
           propertyNames: ['user_id', 'session_id'],
         ),
@@ -27,16 +27,16 @@ class LoginRequestModel extends ApiRequestModel {
   Map<String, dynamic> toJson() => _$LoginRequestModelToJson(this);
 }
 
-@RecordSerializable()
-class LoginRequestRecord {
-  LoginRequestRecord({this.mailAddress, this.password});
+@SchemaSerializable()
+class LoginRequestSchema {
+  LoginRequestSchema({this.mailAddress, this.password});
 
-  factory LoginRequestRecord.fromJson(Map<String, dynamic> json) =>
-      _$LoginRequestRecordFromJson(json);
+  factory LoginRequestSchema.fromJson(Map<String, dynamic> json) =>
+      _$LoginRequestSchemaFromJson(json);
   final String? mailAddress;
   final String? password;
 
-  static RecordSchema? get schema => _$LoginRequestRecordSchema();
+  static RecordSchema? get schema => _$LoginRequestSchema();
 
-  Map<String, dynamic> toJson() => _$LoginRequestRecordToJson(this);
+  Map<String, dynamic> toJson() => _$LoginRequestSchemaToJson(this);
 }

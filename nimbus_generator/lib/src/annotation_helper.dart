@@ -29,10 +29,10 @@ extension ConstantReaderExt on ConstantReader {
     );
   }
 
-  /// Return an instance of [RecordSerializable] corresponding to a the provided
+  /// Return an instance of [SchemaSerializable] corresponding to a the provided
   /// [reader].
-  RecordSerializable toRecord() {
-    return RecordSerializable(
+  SchemaSerializable toRecord() {
+    return SchemaSerializable(
       fieldRename: readEnum(this.read('fieldRename'), FieldRename.values) ??
           FieldRename.none,
     );

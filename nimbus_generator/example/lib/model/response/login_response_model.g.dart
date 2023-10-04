@@ -16,20 +16,20 @@ class _LoginResponseRecord extends Record {
         );
 }
 
-LoginResponseRecord _$LoginResponseRecordFromJson(Map<String, dynamic> json) {
+LoginResponseSchema _$LoginResponseSchemaFromJson(Map<String, dynamic> json) {
   final ds = _LoginResponseRecord();
   ds.fromMap(json);
-  return LoginResponseRecord(
+  return LoginResponseSchema(
     userId: json['user_id'],
     sessionId: json['session_id'],
   );
 }
 
-RecordSchema? _$LoginResponseRecordSchema() {
+RecordSchema? _$LoginResponseSchema() {
   return _LoginResponseRecord().schema;
 }
 
-Map<String, dynamic> _$LoginResponseRecordToJson(LoginResponseRecord instance) {
+Map<String, dynamic> _$LoginResponseSchemaToJson(LoginResponseSchema instance) {
   final ds = _LoginResponseRecord();
   ds.setByName('user_id', instance.userId);
   ds.setByName('session_id', instance.sessionId);
@@ -50,7 +50,7 @@ LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) {
   final ds = _DataSet();
   ds.fromList(json);
   return LoginResponseModel(
-    login: LoginResponseRecord.fromJson(
+    login: LoginResponseSchema.fromJson(
       ds.getHeader('Login')?.toMap() ?? {},
     ),
   );

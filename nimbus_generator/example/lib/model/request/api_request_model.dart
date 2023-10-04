@@ -16,10 +16,10 @@ class ApiRequestModel {
   factory ApiRequestModel.fromJson(Map<String, dynamic> json) =>
       _$ApiRequestModelFromJson(json);
   @DatasetHeader()
-  final CommonRequestRecord? common;
+  final CommonRequestSchema? common;
 
   @DatasetRecordList()
-  final List<HeaderQueryRecord>? headerQuery;
+  final List<HeaderQuerySchema>? headerQuery;
   @DatasetRecordList()
   final List? recordListQuery;
   @DatasetRecordList()
@@ -30,62 +30,62 @@ class ApiRequestModel {
   Map<String, dynamic> toJson() => _$ApiRequestModelToJson(this);
 }
 
-@RecordSerializable(fieldRename: FieldRename.none)
-class HeaderQueryRecord {
-  HeaderQueryRecord({this.name, this.propertyNames});
+@SchemaSerializable(fieldRename: FieldRename.none)
+class HeaderQuerySchema {
+  HeaderQuerySchema({this.name, this.propertyNames});
 
-  factory HeaderQueryRecord.fromJson(Map<String, dynamic> json) =>
-      _$HeaderQueryRecordFromJson(json);
+  factory HeaderQuerySchema.fromJson(Map<String, dynamic> json) =>
+      _$HeaderQuerySchemaFromJson(json);
   final String? name;
   final List<String>? propertyNames;
 
-  static RecordSchema? get schema => _$HeaderQueryRecordSchema();
+  static RecordSchema? get schema => _$HeaderQuerySchema();
 
-  Map<String, dynamic> toJson() => _$HeaderQueryRecordToJson(this);
+  Map<String, dynamic> toJson() => _$HeaderQuerySchemaToJson(this);
 }
 
-@RecordSerializable()
-class CommonRequestRecord {
-  CommonRequestRecord({this.os, this.application, this.userId, this.sessionId});
+@SchemaSerializable()
+class CommonRequestSchema {
+  CommonRequestSchema({this.os, this.application, this.userId, this.sessionId});
 
-  factory CommonRequestRecord.fromJson(Map<String, dynamic> json) =>
-      _$CommonRequestRecordFromJson(json);
-  final OsRecord? os;
-  final ApplicationRecord? application;
+  factory CommonRequestSchema.fromJson(Map<String, dynamic> json) =>
+      _$CommonRequestSchemaFromJson(json);
+  final OsSchema? os;
+  final ApplicationSchema? application;
   final String? userId;
   final String? sessionId;
 
-  static RecordSchema? get schema => _$CommonRequestRecordSchema();
+  static RecordSchema? get schema => _$CommonRequestSchema();
 
-  Map<String, dynamic> toJson() => _$CommonRequestRecordToJson(this);
+  Map<String, dynamic> toJson() => _$CommonRequestSchemaToJson(this);
 }
 
-@RecordSerializable()
-class OsRecord {
-  OsRecord({this.osId, this.osVersion});
+@SchemaSerializable()
+class OsSchema {
+  OsSchema({this.osId, this.osVersion});
 
-  factory OsRecord.fromJson(Map<String, dynamic> json) =>
-      _$OsRecordFromJson(json);
+  factory OsSchema.fromJson(Map<String, dynamic> json) =>
+      _$OsSchemaFromJson(json);
 
   final String? osId;
   final String? osVersion;
 
-  static RecordSchema? get schema => _$OsRecordSchema();
+  static RecordSchema? get schema => _$OsSchema();
 
-  Map<String, dynamic> toJson() => _$OsRecordToJson(this);
+  Map<String, dynamic> toJson() => _$OsSchemaToJson(this);
 }
 
-@RecordSerializable()
-class ApplicationRecord {
-  ApplicationRecord({this.applicationId, this.applicationVersion});
+@SchemaSerializable()
+class ApplicationSchema {
+  ApplicationSchema({this.applicationId, this.applicationVersion});
 
-  factory ApplicationRecord.fromJson(Map<String, dynamic> json) =>
-      _$ApplicationRecordFromJson(json);
+  factory ApplicationSchema.fromJson(Map<String, dynamic> json) =>
+      _$ApplicationSchemaFromJson(json);
 
   final String? applicationId;
   final String? applicationVersion;
 
-  static RecordSchema? get schema => _$ApplicationRecordSchema();
+  static RecordSchema? get schema => _$ApplicationSchema();
 
-  Map<String, dynamic> toJson() => _$ApplicationRecordToJson(this);
+  Map<String, dynamic> toJson() => _$ApplicationSchemaToJson(this);
 }

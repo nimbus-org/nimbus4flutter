@@ -1,6 +1,6 @@
 name: example
 description: A project used to demo the Nimbus annotation
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.0.1 <4.0.0'

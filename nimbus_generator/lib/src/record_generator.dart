@@ -4,13 +4,13 @@ import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'annotation_helper.dart';
 import 'package:nimbus_annotation/nimbus_annotation.dart'
-    show FieldRename, RecordSerializable;
+    show FieldRename, SchemaSerializable;
 import 'package:nimbus_generator/src/dart_type_helper.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
 class RecordSupporterGenerator
-    extends GeneratorForAnnotation<RecordSerializable> {
+    extends GeneratorForAnnotation<SchemaSerializable> {
   FieldRename fieldRename = FieldRename.none;
 
   String _getFieldFormatted(String fieldName) {
@@ -24,7 +24,7 @@ class RecordSupporterGenerator
   @override
   String generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
-    final className = element.displayName;
+    final className = element.displayName.replaceAll('Schema', '');
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'Generator cannot target `$className`.',
@@ -37,25 +37,24 @@ class RecordSupporterGenerator
     final fieldsFomatted = element.fields.where((e) => !e.isStatic);
 
     return DartFormatter().format([
-      _implementRecord(element, annotation, fieldsFomatted).accept(emitter),
+      _implementRecord(className, element, annotation, fieldsFomatted)
+          .accept(emitter),
       _implementFromJsonFunc(className, fields: fieldsFomatted).accept(emitter),
       _implementSchema(className).accept(emitter),
       _implementToJsonFunc(className, fields: fieldsFomatted).accept(emitter),
     ].join('\n\n'));
   }
 
-  Class _implementRecord(ClassElement element, ConstantReader? annotation,
-      Iterable<FieldElement>? fields) {
+  Class _implementRecord(String className, ClassElement element,
+      ConstantReader? annotation, Iterable<FieldElement>? fields) {
     fieldRename = annotation?.toRecord().fieldRename ?? FieldRename.none;
 
     return Class((c) {
-      final recordName = element.displayName;
-
       c
-        ..name = '_$recordName'
+        ..name = '_${className}Record'
         ..extend = refer('Record')
         ..constructors.add(
-          _generateConstructor(recordName, fields: fields),
+          _generateConstructor(className, fields: fields),
         );
     });
   }
@@ -85,7 +84,7 @@ class RecordSupporterGenerator
               !element.type.isPrimitive() && !element.type.isIterable())
           .forEach((element) {
         final name = _getFieldFormatted(element.displayName);
-        final type = element.type.getDisplayString(withNullability: false);
+        final type = element.type.getDisplayString(withNullability: false).replaceAll("Schema", "Record");
 
         body.add(Code("setByName('$name', _$type());"));
       });
@@ -101,7 +100,7 @@ class RecordSupporterGenerator
       {Iterable<FieldElement>? fields}) {
     final blocks = <Code>[];
     blocks.add(
-        declareFinal('ds').assign(refer('_$className').call([])).statement);
+        declareFinal('ds').assign(refer('_${className}Record').call([])).statement);
     blocks.add(Code('ds.fromMap(json);'));
     final fi = fields?.map((e) {
       final isPrimitive = e.type.isPrimitive();
@@ -114,14 +113,14 @@ class RecordSupporterGenerator
       }
     });
 
-    blocks.add(Code('return $className(${fi?.join(',')},);'));
+    blocks.add(Code('return ${className}Schema(${fi?.join(',')},);'));
     return Method(
       (b) => b
-        ..name = '_\$${className}FromJson'
+        ..name = '_\$${className}SchemaFromJson'
         ..requiredParameters.add(Parameter((p) => p
           ..name = 'json'
           ..type = refer('Map<String, dynamic>')))
-        ..returns = refer(className)
+        ..returns = refer('${className}Schema')
         ..body = Block.of(blocks),
     );
   }
@@ -130,7 +129,7 @@ class RecordSupporterGenerator
       {Iterable<FieldElement>? fields}) {
     final blocks = <Code>[];
     blocks.add(
-        declareFinal('ds').assign(refer('_$className').call([])).statement);
+        declareFinal('ds').assign(refer('_${className}Record').call([])).statement);
 
     fields?.forEach((element) {
       final name = element.displayName;
@@ -147,7 +146,7 @@ class RecordSupporterGenerator
           blocks.add(Code(
               "ds.setByName('${_getFieldFormatted(name)}', instance.$name);"));
         } else {
-          final type = element.type.getDisplayString(withNullability: false);
+          final type = element.type.getDisplayString(withNullability: false).replaceAll("Schema", "Record");
 
           blocks.add(declareFinal(type.camelCase)
               .assign(refer('_$type().fromMap').call(
@@ -162,10 +161,10 @@ class RecordSupporterGenerator
     blocks.add(Code('return ds.toMap();'));
     return Method(
       (b) => b
-        ..name = '_\$${className}ToJson'
+        ..name = '_\$${className}SchemaToJson'
         ..requiredParameters.add(Parameter((p) => p
           ..name = 'instance'
-          ..type = refer(className)))
+          ..type = refer('${className}Schema')))
         ..returns = refer('Map<String, dynamic>')
         ..body = Block.of(blocks),
     );
@@ -175,6 +174,6 @@ class RecordSupporterGenerator
     return Method((b) => b
       ..name = '_\$${className}Schema'
       ..returns = refer('RecordSchema?')
-      ..body = Code('return _$className().schema;'));
+      ..body = Code('return _${className}Record().schema;'));
   }
 }
