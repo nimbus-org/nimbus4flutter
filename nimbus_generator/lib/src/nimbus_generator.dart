@@ -263,6 +263,8 @@ ApiRegistory.registApiServer(
     final returnType = _displayString(_getResponseType(m.type.returnType),
         withNullability: true);
 
+    final hasRequest = m.parameters.isNotEmpty;
+
     final blocks = <Code>[];
     blocks.add(declareFinal('api')
         .assign(CodeExpression(Code("ApiRegistory.getApi('${m.name}')")))
@@ -271,8 +273,8 @@ ApiRegistory.registApiServer(
         .assign(CodeExpression(Code("RequestContext()")))
         .statement);
     blocks.add(declareFinal('response')
-        .assign(CodeExpression(
-            Code("await api?.request(request.toJson(), context)")))
+        .assign(CodeExpression(Code(
+            "await api?.request(${hasRequest ? 'request.toJson()' : '{}'}, context)")))
         .statement);
     blocks.add(Code('return $returnType.fromJson(response);'));
     return Block.of(blocks);

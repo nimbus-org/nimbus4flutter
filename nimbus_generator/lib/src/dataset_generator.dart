@@ -89,7 +89,9 @@ class DatasetSupporterGenerator
         blocks.add(Code("setRecordListSchema($type.schema!, '$name');"));
       });
 
-      c.body = Block.of(blocks);
+      if (blocks.isNotEmpty) {
+        c.body = Block.of(blocks);
+      }
     });
   }
 
@@ -105,15 +107,15 @@ class DatasetSupporterGenerator
       final name = e.displayName.pascalCase;
       if (e.type.isIterable()) {
         if (e.type.coreIterableGenericType().isLikeDynamic) {
-          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => e).toList()";
+          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => e).toList(),";
         } else {
-          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => ${name}Schema.fromJson(e)).toList()";
+          return "${e.displayName}: ds.getRecordList('$name')?.toMap().map((e) => ${name}Schema.fromJson(e)).toList(),";
         }
       } else {
-        return "${e.displayName}: $type.fromJson(ds.getHeader('$name')?.toMap() ?? {},)";
+        return "${e.displayName}: $type.fromJson(ds.getHeader('$name')?.toMap() ?? {},),";
       }
     });
-    blocks.add(Code('return $className(${fromJsonField?.join(',')},);'));
+    blocks.add(Code('return $className(${fromJsonField?.join('')});'));
     return Method(
       (b) => b
         ..name = '_\$${className}FromJson'
